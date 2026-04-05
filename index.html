@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>🛹 Classes: Skill Tree</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -14,8 +14,21 @@
     .trick-card.locked { opacity: 0.5; filter: grayscale(0.8); cursor: not-allowed; }
     .trick-card.available { border-color: var(--orange); border-style: dashed; }
     
-    .tree-container-wrapper { width: 100%; overflow-x: auto; background: #000; border-radius: 12px; border: 1px solid var(--border); padding: 20px; }
-    .tree-svg { width: 100%; height: auto; min-width: 800px; display: block; }
+    /* MODIFIED: Added touch-action and cursor for the pan/zoom logic */
+    .tree-container-wrapper { 
+      width: 100%; 
+      height: 70vh; 
+      background: #000; 
+      border-radius: 12px; 
+      border: 1px solid var(--border); 
+      position: relative; 
+      overflow: hidden; 
+      touch-action: none; 
+      cursor: grab; 
+    }
+    .tree-container-wrapper:active { cursor: grabbing; }
+
+    .tree-svg { width: 100%; height: 100%; display: block; }
     .tree-svg line { stroke: #333; stroke-width: 2; transition: stroke 0.5s; }
     .tree-svg line.lit { stroke: var(--green); stroke-width: 3; }
     .tree-node rect { rx: 8; ry: 8; cursor: pointer; transition: transform 0.2s; }
@@ -111,6 +124,14 @@
     let currentId = localStorage.getItem('skate_id_v3') || allStudents[0].id;
     let viewMode = 'grid';
 
+    // NEW GLOBAL STATE FOR ZOOM/PAN
+    let zoom = 1.0;
+    let offsetX = 0;
+    let offsetY = 0;
+    let isDragging = false;
+    let lastMousePos = { x: 0, y: 0 };
+    let initialPinchDist = null;
+
     function getStudent() { return allStudents.find(s => s.id === currentId) || allStudents[0]; }
     function save() { localStorage.setItem('skate_v3', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v3', currentId); }
     const isUnlocked = (id, progress) => !!progress[id];
@@ -129,13 +150,10 @@
 
     function renderGrid(student, searchTerm) {
       const container = document.getElementById('tree-container');
-      // Get unique levels and sort them
       const levels = [...new Set(tricksData.map(t => t.level))].sort((a,b) => a - b);
-      
       levels.forEach(lvl => {
         const lvlTricks = tricksData.filter(t => t.level === lvl && t.name.toLowerCase().includes(searchTerm));
         if (lvlTricks.length === 0) return;
-        
         const section = document.createElement('div');
         section.className = "mb-8";
         section.innerHTML = `
@@ -202,8 +220,77 @@
         nodesMarkup += `<g class="tree-node" onclick="openModal('${t.id}')" style="opacity: ${matchesSearch ? 1 : 0.2}"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" class="${unlocked ? 'node-unlocked' : (ready ? 'node-available' : 'node-locked')}" /><text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 5}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text></g>`;
       });
 
-      container.innerHTML = `<div class="tree-container-wrapper"><svg viewBox="-20 0 ${totalW + 40} ${totalH}" class="tree-svg">${linesMarkup}${nodesMarkup}</svg></div>`;
+      // MODIFIED: Injecting Wrapper with Zoom Controls and Event Listeners
+      container.innerHTML = `
+        <div class="tree-container-wrapper" id="treeWrapper">
+          <div class="absolute top-4 left-4 z-10 flex flex-col gap-2">
+            <button onclick="handleZoomBtn(0.8)" class="bg-zinc-800 w-8 h-8 rounded border border-zinc-700 font-bold">+</button>
+            <button onclick="handleZoomBtn(1.2)" class="bg-zinc-800 w-8 h-8 rounded border border-zinc-700 font-bold">-</button>
+            <button onclick="resetZoom()" class="bg-zinc-800 px-2 py-1 rounded border border-zinc-700 text-[9px] font-black">RESET</button>
+          </div>
+          <svg id="treeSvg" viewBox="${offsetX} ${offsetY} ${totalW * zoom} ${totalH * zoom}" class="tree-svg">
+            ${linesMarkup}${nodesMarkup}
+          </svg>
+        </div>`;
+
+      initInteractionHandlers(document.getElementById('treeWrapper'), document.getElementById('treeSvg'), totalW, totalH);
     }
+
+    // NEW INTERACTION SURGERY: Function to handle dragging and pinching
+    function initInteractionHandlers(wrapper, svg, totalW, totalH) {
+      const updateView = () => {
+        svg.setAttribute('viewBox', `${offsetX} ${offsetY} ${wrapper.clientWidth * zoom} ${wrapper.clientHeight * zoom}`);
+      };
+
+      const startDrag = (x, y) => { isDragging = true; lastMousePos = { x, y }; };
+      const moveDrag = (x, y) => {
+        if (!isDragging) return;
+        offsetX += (lastMousePos.x - x) * zoom;
+        offsetY += (lastMousePos.y - y) * zoom;
+        lastMousePos = { x, y };
+        updateView();
+      };
+
+      // Mouse Listeners
+      wrapper.onmousedown = (e) => startDrag(e.clientX, e.clientY);
+      window.onmousemove = (e) => moveDrag(e.clientX, e.clientY);
+      window.onmouseup = () => isDragging = false;
+      wrapper.onwheel = (e) => {
+        e.preventDefault();
+        zoom *= (e.deltaY > 0 ? 1.1 : 0.9);
+        zoom = Math.min(Math.max(zoom, 0.2), 5);
+        updateView();
+      };
+
+      // Touch Listeners (Mobile)
+      wrapper.ontouchstart = (e) => {
+        if (e.touches.length === 1) {
+          startDrag(e.touches[0].clientX, e.touches[0].clientY);
+        } else if (e.touches.length === 2) {
+          initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        }
+      };
+
+      wrapper.ontouchmove = (e) => {
+        if (e.touches.length === 1) {
+          moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+        } else if (e.touches.length === 2 && initialPinchDist) {
+          const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+          zoom *= (initialPinchDist / dist);
+          zoom = Math.min(Math.max(zoom, 0.2), 5);
+          initialPinchDist = dist;
+          updateView();
+        }
+      };
+
+      wrapper.ontouchend = () => { isDragging = false; initialPinchDist = null; };
+      
+      // Sync initial view
+      updateView();
+    }
+
+    window.handleZoomBtn = (factor) => { zoom *= factor; render(); };
+    window.resetZoom = () => { zoom = 1.0; offsetX = 0; offsetY = 0; render(); };
 
     window.openModal = (id) => {
       const t = tricksData.find(x => x.id === id);
