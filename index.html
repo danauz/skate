@@ -9,20 +9,27 @@
     :root { --bg: #09090b; --surface: #18181b; --orange: #f97316; --green: #22c55e; --border: #27272a; }
     body { background-color: var(--bg); color: #ffffff; font-family: sans-serif; overflow-x: hidden; margin: 0; }
     .neon-orange { color: var(--orange); text-shadow: 0 0 10px rgba(249, 115, 22, 0.5); }
+    
+    /* Tier Grid Styling */
     .tier-wrapper { margin-bottom: 2.5rem; border-left: 4px solid var(--border); padding-left: 1rem; }
-    .tier-1 { border-color: #94a3b8; } 
-    .tier-2 { border-color: #fbbf24; } 
-    .tier-3 { border-color: #ef4444; } 
-    .tier-4 { border-color: #3b82f6; } 
-    .tier-5 { border-color: #a855f7; }
+    .tier-1 { border-color: #94a3b8; } .tier-2 { border-color: #fbbf24; } 
+    .tier-3 { border-color: #ef4444; } .tier-4 { border-color: #3b82f6; } .tier-5 { border-color: #a855f7; }
+
     .trick-card { transition: all 0.2s ease; border: 2px solid var(--border); background-color: var(--surface); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; border-radius: 12px; }
     .trick-card.unlocked { border-color: var(--green); background: linear-gradient(135deg, var(--surface), #064e3b33); }
     .trick-card.locked { opacity: 0.5; filter: grayscale(0.8); cursor: not-allowed; }
     .trick-card.available { border-color: var(--orange); border-style: dashed; }
-    .tree-container-wrapper { width: 100%; height: 60vh; background: #000; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: hidden; touch-action: none; cursor: grab; }
+
+    /* Tree View Styling */
+    .tree-container-wrapper { width: 100%; height: 70vh; background: #000; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: hidden; touch-action: none; cursor: grab; }
     .tree-svg { width: 100%; height: 100%; display: block; }
     .tree-svg line { stroke: #333; stroke-width: 2; transition: stroke 0.5s; }
     .tree-svg line.lit { stroke: var(--green); stroke-width: 3; }
+    .tree-node rect { rx: 6; ry: 6; cursor: pointer; fill: #18181b; stroke: #27272a; stroke-width: 2; }
+    .tree-node.node-unlocked rect { fill: #064e3b; stroke: var(--green); }
+    .tree-node.node-available rect { stroke: var(--orange); stroke-dasharray: 4; }
+    .tree-node.node-locked { opacity: 0.4; }
+
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; padding: 1rem; }
     .modal-overlay.open { display: flex; }
     .menu-panel { display: none; position: absolute; right: 0; top: 110%; width: 180px; background: #27272a; border: 1px solid var(--border); border-radius: 8px; z-index: 50; }
@@ -33,7 +40,7 @@
   <div class="max-w-5xl mx-auto p-4">
     <header class="flex flex-col md:flex-row justify-between items-center mb-6 bg-zinc-900 p-4 rounded-xl border border-zinc-800 gap-4">
       <div>
-        <h1 class="text-xl font-black italic tracking-tighter uppercase leading-none">Classes<span class="neon-orange"></span></h1>
+        <h1 class="text-xl font-black italic tracking-tighter uppercase leading-none">Classes</h1>
         <p class="text-orange-500 text-[10px] font-bold uppercase tracking-[0.2em]">Tiered Academy</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
@@ -70,7 +77,7 @@
 
     <input type="text" id="search" placeholder="Search tricks..." oninput="render()" class="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3 py-3 text-sm mb-6 outline-none">
 
-    <div id="tree-container"></div>
+    <div id="main-container"></div>
   </div>
 
   <div class="modal-overlay" id="modal-overlay" onclick="if(event.target==this) closeModal()">
@@ -80,11 +87,10 @@
 <script>
     /* ==========================================
        TRICK REPOSITORY (TIER-BASED)
-       Add new tricks into the correct Tier below.
        ========================================== */
     const tierConfig = {
       1: {
-        name: "Fundementals (Tier 1)",
+        name: "Fundamentals (Tier 1)",
         tricks: [
           { id: "stance", name: "Stance", description: "Finding your natural footing.", tips: "Which foot feels best forward?", prereqs: [] },
           { id: "push", name: "Pushing", description: "Generating momentum.", tips: "Keep weight on the front foot.", prereqs: ["stance"] },
@@ -111,7 +117,7 @@
         ]
       },
       3: {
-        name: "Imtermediate (Tier 3)",
+        name: "Intermediate (Tier 3)",
         tricks: [
           { id: "caveman", name: "Caveman", description: "Jump onto board.", tips: "Hold nose, jump, and place.", prereqs: ["stance"] },
           { id: "rock to fakie", name: "Rock to Fakie", description: "Stall and fakie out.", tips: "Lift front trucks over coping.", prereqs: ["drop-in"] },
@@ -134,15 +140,11 @@
       }
     };
 
-    // Flatten data for the engine but keep levels linked
-    const tricksData = Object.keys(tierConfig).flatMap(lvl => 
-      tierConfig[lvl].tricks.map(t => ({ ...t, level: parseInt(lvl) }))
-    );
-
+    const tricksData = Object.keys(tierConfig).flatMap(lvl => tierConfig[lvl].tricks.map(t => ({ ...t, level: parseInt(lvl) })));
     let allStudents = JSON.parse(localStorage.getItem('skate_v3')) || [{ id: "s1", name: "New Skater", progress: {}, stance: "regular" }];
     let currentId = localStorage.getItem('skate_id_v3') || allStudents[0].id;
     let viewMode = 'grid';
-    let zoom = 1.0, offsetX = 0, offsetY = 0, isDragging = false, lastMousePos = { x: 0, y: 0 }, initialPinchDist = null;
+    let zoom = 1.0, offsetX = 0, offsetY = 0, isDragging = false, lastMousePos = { x: 0, y: 0 };
 
     function getStudent() { return allStudents.find(s => s.id === currentId) || allStudents[0]; }
     function save() { localStorage.setItem('skate_v3', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v3', currentId); }
@@ -153,84 +155,83 @@
     function render() {
       const student = getStudent();
       const searchTerm = document.getElementById('search').value.toLowerCase();
-      const container = document.getElementById('tree-container');
+      const container = document.getElementById('main-container');
       container.innerHTML = '';
       document.getElementById('statsProgress').textContent = `${Object.keys(student.progress).length}/${tricksData.length}`;
       if (viewMode === 'grid') renderGrid(student, searchTerm); else renderTree(student, searchTerm);
     }
 
     function renderGrid(student, searchTerm) {
-      const container = document.getElementById('tree-container');
+      const container = document.getElementById('main-container');
       Object.keys(tierConfig).forEach(lvl => {
         const lvlTricks = tierConfig[lvl].tricks.filter(t => t.name.toLowerCase().includes(searchTerm));
         if (lvlTricks.length === 0 && searchTerm !== "") return;
-
         const section = document.createElement('div');
         section.className = `tier-wrapper tier-${lvl}`;
-        section.innerHTML = `
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="font-black italic uppercase text-sm tracking-widest text-white">${tierConfig[lvl].name}</h2>
-          </div>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            ${lvlTricks.map(t => {
-              const unlocked = isUnlocked(t.id, student.progress);
-              const ready = canUnlock(t, student.progress);
-              return `
-                <div onclick="openModal('${t.id}')" class="trick-card p-3 cursor-pointer ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}">
-                  <div>
-                    <div class="flex justify-between items-start mb-1">
-                      <span class="text-[9px] font-bold text-zinc-600 uppercase">TIER ${lvl}</span>
-                      ${unlocked ? '✅' : (ready ? '' : '🔒')}
-                    </div>
-                    <h3 class="font-bold text-xs uppercase">${t.name}</h3>
-                  </div>
-                  ${(!unlocked && t.prereqs.length > 0) ? `<div class="mt-2 text-[8px] font-bold text-zinc-500 uppercase">Needs: ${getPrereqNames(t.prereqs)}</div>` : ''}
-                </div>`;
-            }).join('')}
-          </div>`;
+        section.innerHTML = `<h2 class="font-black italic uppercase text-sm tracking-widest text-white mb-4">${tierConfig[lvl].name}</h2><div class="grid grid-cols-2 md:grid-cols-4 gap-3">${lvlTricks.map(t => {
+            const unlocked = isUnlocked(t.id, student.progress);
+            const ready = canUnlock(t, student.progress);
+            return `<div onclick="openModal('${t.id}')" class="trick-card p-3 cursor-pointer ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}"><div><div class="flex justify-between items-start mb-1"><span class="text-[9px] font-bold text-zinc-600 uppercase">TIER ${lvl}</span>${unlocked ? '✅' : (ready ? '' : '🔒')}</div><h3 class="font-bold text-xs uppercase">${t.name}</h3></div>${(!unlocked && t.prereqs.length > 0) ? `<div class="mt-2 text-[8px] font-bold text-zinc-500 uppercase">Needs: ${getPrereqNames(t.prereqs)}</div>` : ''}</div>`;
+        }).join('')}</div>`;
         container.appendChild(section);
       });
     }
 
     function renderTree(student, searchTerm) {
-      const container = document.getElementById('tree-container');
-      const nodeW = 110, nodeH = 40, padX = 40, padY = 80;
+      const container = document.getElementById('main-container');
+      const nodeW = 120, nodeH = 45, gapX = 50, gapY = 100;
       const pos = {};
-      let maxRowWidth = 0;
-      const sortedKeys = Object.keys(tierConfig).sort((a,b)=>a-b);
-      sortedKeys.forEach((lvl, rowIdx) => {
-        const row = tierConfig[lvl].tricks;
-        const rowW = row.length * (nodeW + padX);
-        if (rowW > maxRowWidth) maxRowWidth = rowW;
-        const startX = (maxRowWidth - rowW) / 2;
-        row.forEach((t, colIdx) => { pos[t.id] = { x: startX + colIdx * (nodeW + padX), y: rowIdx * (nodeH + padY) + 60 }; });
+      const sortedTiers = Object.keys(tierConfig).sort((a,b)=>a-b);
+      
+      // Fixed Positioning Logic: Find widest tier to define center
+      let maxTierWidth = 0;
+      sortedTiers.forEach(lvl => {
+        const width = tierConfig[lvl].tricks.length * (nodeW + gapX);
+        if (width > maxTierWidth) maxTierWidth = width;
       });
-      const totalW = maxRowWidth, totalH = sortedKeys.length * (nodeH + padY) + 100;
+
+      sortedTiers.forEach((lvl, rowIdx) => {
+        const tricks = tierConfig[lvl].tricks;
+        const rowWidth = tricks.length * (nodeW + gapX);
+        const startX = (maxTierWidth - rowWidth) / 2;
+        tricks.forEach((t, colIdx) => {
+          pos[t.id] = { x: startX + colIdx * (nodeW + gapX), y: rowIdx * (nodeH + gapY) + 50 };
+        });
+      });
+
       let nodes = '', lines = '';
       tricksData.forEach(t => {
         const p = pos[t.id];
         const unlocked = isUnlocked(t.id, student.progress);
         const matches = t.name.toLowerCase().includes(searchTerm);
+        const opacity = matches ? 1 : 0.15;
+
         t.prereqs.forEach(pid => {
           const parent = pos[pid];
-          if (parent) lines += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${unlocked && isUnlocked(pid, student.progress) ? 'lit' : ''}" style="stroke: ${unlocked ? '#22c55e' : '#333'}; opacity: ${matches ? 1 : 0.2}" />`;
+          if (parent) {
+            const isLit = unlocked && isUnlocked(pid, student.progress);
+            lines += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${isLit ? 'lit' : ''}" style="stroke: ${isLit ? '#22c55e' : '#333'}; opacity: ${opacity}" />`;
+          }
         });
-        nodes += `<g class="tree-node" onclick="openModal('${t.id}')" style="opacity: ${matches ? 1 : 0.2}"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" class="${unlocked ? 'node-unlocked' : (canUnlock(t, student.progress) ? 'node-available' : 'node-locked')}" /><text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 5}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text></g>`;
+
+        const statusClass = unlocked ? 'node-unlocked' : (canUnlock(t, student.progress) ? 'node-available' : 'node-locked');
+        nodes += `<g class="tree-node ${statusClass}" onclick="openModal('${t.id}')" style="opacity: ${opacity}"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" /><text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 5}" text-anchor="middle" fill="white" font-size="10" font-weight="bold" class="uppercase">${t.name}</text></g>`;
       });
-      container.innerHTML = `<div class="tree-container-wrapper" id="treeWrapper"><svg id="treeSvg" class="tree-svg">${lines}${nodes}</svg></div>`;
-      initInteractionHandlers(document.getElementById('treeWrapper'), document.getElementById('treeSvg'));
+
+      container.innerHTML = `<div class="tree-container-wrapper" id="treeWrapper"><svg id="treeSvg" class="tree-svg" style="width:${maxTierWidth}px; height:${sortedTiers.length * (nodeH + gapY) + 100}px">${lines}${nodes}</svg></div>`;
+      initInteraction(document.getElementById('treeWrapper'), document.getElementById('treeSvg'));
     }
 
-    function initInteractionHandlers(wrapper, svg) {
-      const updateView = () => { svg.setAttribute('viewBox', `${offsetX} ${offsetY} ${wrapper.clientWidth * zoom} ${wrapper.clientHeight * zoom}`); };
+    function initInteraction(wrapper, svg) {
+      const update = () => svg.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${zoom})`;
       wrapper.onmousedown = (e) => { isDragging = true; lastMousePos = { x: e.clientX, y: e.clientY }; };
-      window.onmousemove = (e) => { if (!isDragging) return; offsetX += (lastMousePos.x - e.clientX) * zoom; offsetY += (lastMousePos.y - e.clientY) * zoom; lastMousePos = { x: e.clientX, y: e.clientY }; updateView(); };
+      window.onmousemove = (e) => { if (!isDragging) return; offsetX += e.clientX - lastMousePos.x; offsetY += e.clientY - lastMousePos.y; lastMousePos = { x: e.clientX, y: e.clientY }; update(); };
       window.onmouseup = () => isDragging = false;
-      wrapper.onwheel = (e) => { e.preventDefault(); zoom *= (e.deltaY > 0 ? 1.1 : 0.9); updateView(); };
-      wrapper.ontouchstart = (e) => { if (e.touches.length === 1) { isDragging = true; lastMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY }; } else if (e.touches.length === 2) { initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); } };
-      wrapper.ontouchmove = (e) => { if (e.touches.length === 1 && isDragging) { offsetX += (lastMousePos.x - e.touches[0].clientX) * zoom; offsetY += (lastMousePos.y - e.touches[0].clientY) * zoom; lastMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY }; updateView(); } else if (e.touches.length === 2 && initialPinchDist) { const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); zoom *= (initialPinchDist / dist); initialPinchDist = dist; updateView(); } };
-      wrapper.ontouchend = () => { isDragging = false; initialPinchDist = null; };
-      updateView();
+      wrapper.onwheel = (e) => { e.preventDefault(); const s = e.deltaY > 0 ? 0.9 : 1.1; zoom *= s; update(); };
+      // Touch Support
+      wrapper.ontouchstart = (e) => { isDragging = true; lastMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY }; };
+      wrapper.ontouchmove = (e) => { if (!isDragging) return; offsetX += e.touches[0].clientX - lastMousePos.x; offsetY += e.touches[0].clientY - lastMousePos.y; lastMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY }; update(); };
+      wrapper.ontouchend = () => isDragging = false;
     }
 
     window.openModal = (id) => {
@@ -238,15 +239,7 @@
       const student = getStudent();
       const unlocked = isUnlocked(id, student.progress);
       const ready = canUnlock(t, student.progress);
-      document.getElementById('modal-content').innerHTML = `
-        <h2 class="text-xl font-black italic neon-orange uppercase mb-1">${t.name}</h2>
-        ${t.prereqs.length > 0 ? `<div class="text-[10px] font-black uppercase text-zinc-500 mb-2">Needs: ${getPrereqNames(t.prereqs)}</div>` : ''}
-        <p class="text-zinc-400 text-sm mb-4 mt-4">${t.description}</p>
-        <div class="bg-black/40 p-4 rounded-xl border border-zinc-800 mb-6"><strong class="text-orange-500 text-[10px] uppercase block mb-1">Coach Tips:</strong><p class="text-xs italic">"${t.tips}"</p></div>
-        <div class="flex gap-2">
-            ${unlocked ? `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-zinc-800 rounded-lg font-bold text-xs">UNLEARN</button>` : (ready ? `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-orange-600 rounded-lg font-bold text-xs">LEARNED</button>` : `<button class="flex-1 py-3 bg-zinc-800 text-zinc-600 rounded-lg font-bold text-xs cursor-not-allowed">LOCKED</button>`)}
-            <button onclick="closeModal()" class="px-4 py-3 bg-zinc-700 rounded-lg font-bold text-xs">CLOSE</button>
-        </div>`;
+      document.getElementById('modal-content').innerHTML = `<h2 class="text-xl font-black italic neon-orange uppercase mb-1">${t.name}</h2>${t.prereqs.length > 0 ? `<div class="text-[10px] font-black uppercase text-zinc-500 mb-2">Needs: ${getPrereqNames(t.prereqs)}</div>` : ''}<p class="text-zinc-400 text-sm mb-4 mt-4">${t.description}</p><div class="bg-black/40 p-4 rounded-xl border border-zinc-800 mb-6"><strong class="text-orange-500 text-[10px] uppercase block mb-1">Coach Tips:</strong><p class="text-xs italic">"${t.tips}"</p></div><div class="flex gap-2">${unlocked ? `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-zinc-800 rounded-lg font-bold text-xs">UNLEARN</button>` : (ready ? `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-orange-600 rounded-lg font-bold text-xs">LEARNED</button>` : `<button class="flex-1 py-3 bg-zinc-800 text-zinc-600 rounded-lg font-bold text-xs cursor-not-allowed">LOCKED</button>`)}<button onclick="closeModal()" class="px-4 py-3 bg-zinc-700 rounded-lg font-bold text-xs">CLOSE</button></div>`;
       document.getElementById('modal-overlay').classList.add('open');
     };
 
