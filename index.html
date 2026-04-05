@@ -256,12 +256,12 @@
 
     window.closeModal = () => document.getElementById('modal-overlay').classList.remove('open');
     window.toggleMenu = () => document.getElementById('dataMenu').classList.toggle('active');
-    window.setView = (v) => { 
-      viewMode = v; 
-      document.getElementById('btnGrid').className = v === 'grid' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800';
-      document.getElementById('btnTree').className = v === 'tree' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800';
-      render(); 
-    };
+window.setView = (v) => { 
+  viewMode = v; 
+  document.getElementById('btnGrid').className = v === 'grid' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800';
+  document.getElementById('btnTree').className = v === 'tree' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800';
+  render(); 
+};
 
     window.addNewStudent = () => {
       const n = prompt("Skater Name:");
