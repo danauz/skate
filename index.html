@@ -34,7 +34,7 @@
     <header class="flex flex-col md:flex-row justify-between items-center mb-6 bg-zinc-900 p-4 rounded-xl border border-zinc-800 gap-4">
       <div>
         <h1 class="text-xl font-black italic tracking-tighter uppercase leading-none">SKILL<span class="neon-orange">TREE</span></h1>
-        <p class="text-orange-500 text-[10px] font-bold uppercase tracking-[0.2em]">Demented Down Under</p>
+        <p class="text-orange-500 text-[10px] font-bold uppercase tracking-[0.2em]">Classes</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <select id="studentSelect" onchange="switchStudent()" class="bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-xs outline-none"></select>
@@ -91,8 +91,8 @@
       { id: "drop-in", name: "Drop-In", category: "Fundamentals", level: 2, description: "Entering from coping.", tips: "Slam those front wheels down!", prereqs: ["stop"] },
       { id: "manual", name: "Manual", category: "Fundamentals", level: 2, description: "2-wheel balance.", tips: "Use arms for balance.", prereqs: ["tictac"] },
       { id: "ollie", name: "Ollie", category: "Fundamentals", level: 2, description: "Foundation jump.", tips: "Pop tail hard, slide foot up.", prereqs: ["push", "tictac", "stop"] },
-      { id: "shuvit", name: "Shuvit", category: "Intermediate", level: 3, description: "180 board spin.", tips: "Scoop the tail back.", prereqs: ["push"] },
-      { id: "nollie shuvit", name: "Nollie Shuvit", category: "Intermediate", level: 3, description: "Front-foot scoop.", tips: "Pop the nose.", prereqs: ["shuvit"] },
+      { id: "shuvit", name: "Shuvit", category: "Fundamentals", level: 2, description: "180 board spin.", tips: "Scoop the tail back.", prereqs: ["push"] },
+      { id: "nollie shuvit", name: "Nollie Shuvit", category: "Fundamentals", level: 2, description: "Front-foot scoop.", tips: "Pop the nose.", prereqs: ["shuvit"] },
       { id: "caveman", name: "Caveman", category: "Intermediate", level: 3, description: "Jump onto board.", tips: "Hold nose, jump, and place.", prereqs: ["stance"] },
       { id: "rock to fakie", name: "Rock to Fakie", category: "Intermediate", level: 3, description: "Stall and fakie out.", tips: "Lift front trucks over coping.", prereqs: ["drop-in"] },
       { id: "fly out", name: "Fly Out", category: "Intermediate", level: 3, description: "Exit ramp to flat.", tips: "Level board in air.", prereqs: ["pumping"] },
