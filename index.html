@@ -78,31 +78,39 @@
 
   <script>
     const tricksData = [
-      { id: "stance", name: "Stance", category: "basics", level: 1, description: "Finding your natural footing.", tips: "Which foot feels best forward?", prereqs: [] },
-      { id: "push", name: "Pushing", category: "basics", level: 1, description: "Generating momentum", tips: "Keep weight on the front foot.", prereqs: ["stance"] },
-      { id: "stop", name: "Foot Brake", category: "basics", level: 1, description: "Controlled stopping", tips: "Drag your back sole lightly.", prereqs: ["push"] },
-      { id: "pumping", name: "Pumping", category: "basics", level: 1, description: "Generating momentum", tips: "Bend your knees slightly", prereqs: ["push"] },
-      { id: "falling", name: "Falling", category: "basics", level: 1, description: "Controlled Falling", tips: "Roll with it.", prereqs: [] },
-      { id: "turning", name: "Turning", category: "basics", level: 1, description: "Controlled turning", tips: "Lean", prereqs: ["push"] },
-      { id: "caveman", name: "Caveman", category: "fundamentals", level: 3, description: "jumping onto the board", tips: "trick done by jumping onto one's board", prereqs: ["stance"] },
-      { id: "running start", name: "Running Start", category: "basics", level: 2, description: "push the board then run and jump onto the board", tips: "Look where you want to go.", prereqs: ["push", "tictac"] },
-      { id: "tictac", name: "Tic-Tacs", category: "basics", level: 2, description: "Pivot turns", tips: "Swing your shoulders first.", prereqs: ["push"] },
-      { id: "kickturn", name: "Kickturn", category: "basics", level: 2, description: "Pivot turns", tips: "Look where you want to go.", prereqs: ["push", "tictac"] },
-      { id: "spine transfer", name: "Spine Transfer", category: "fundamentals", level: 3, description: "over a spine", tips: "fly over the spine", prereqs: ["push", "tictac"] },
-      { id: "boneless", name: "Boneless", category: "fundamentals", level: 3, description: "kick of the ground", tips: "Hold the board an jump kick of the ground", prereqs: ["push", "tictac"] },
-      { id: "fly out", name: "Fly Out", category: "fundamentals", level: 3, description: "up a ramp", tips: "up a ramp land on a flat", prereqs: ["push", "tictac"] },
-      { id: "hippie jump", name: "Hippie Jump", category: "basics", level: 2, description: "jump into the air land on the bolts", tips: "be confident.", prereqs: ["push", "falling"] },
-      { id: "ride switch", name: "Switch", category: "basics", level: 2, description: "Ride opposite", tips: "Feels weird at first!", prereqs: ["push"] },
-      { id: "roll in", name: "Roll in", category: "basics", level: 3, description: "Rolling into a ramp", tips: "Commit weight forward.", prereqs: ["push"] },
-      { id: "drop-in", name: "Drop-In", category: "transition", level: 3, description: "Entering from coping", tips: "Slam front wheels down!", prereqs: ["stop"] },
-      { id: "rock to fakie", name: "Rock to Fakie", category: "transition", level: 4, description: "Ramp stall", tips: "Pass front trucks over lip.", prereqs: ["drop-in"] },
-      { id: "manual", name: "Manual", category: "fundamentals", level: 4, description: "Balance on 2 wheels", tips: "Use your arms for balance.", prereqs: ["tictac"] },
-      { id: "ollie", name: "Ollie", category: "fundamentals", level: 4, description: "Jump with board", tips: "Pop down, slide up.", prereqs: ["push", "tictac", "stop"] },
-      { id: "shuvit", name: "Shuvit", category: "basics", level: 5, description: "180 board spin", tips: "Scoop the tail back.", prereqs: ["push"] },
-      { id: "kickflip", name: "Kickflip", category: "flips", level: 5, description: "Classic flip", tips: "Flick the pocket.", prereqs: ["ollie"] }
+      { id: "stance", name: "Stance", category: "tier1", level: 1, description: "Finding your natural footing.", tips: "Which foot feels best forward?", prereqs: [] },
+      { id: "push", name: "Pushing", category: "tier1", level: 1, description: "Generating momentum", tips: "Keep weight on the front foot.", prereqs: ["stance"] },
+      { id: "stop", name: "Foot Brake", category: "tier1", level: 1, description: "Controlled stopping", tips: "Drag your back sole lightly.", prereqs: ["push"] },
+      { id: "pumping", name: "Pumping", category: "tier1", level: 1, description: "Generating momentum", tips: "Bend your knees slightly", prereqs: ["push"] },
+      { id: "falling", name: "Falling", category: "tier1", level: 1, description: "Controlled Falling", tips: "Roll with it.", prereqs: [] },
+      { id: "turning", name: "Turning", category: "tier1", level: 1, description: "Controlled turning", tips: "Lean", prereqs: ["push"] },
+      { id: "running start", name: "Running Start", category: "tier2", level: 2, description: "push the board then run and jump onto the board", tips: "Look where you want to go.", prereqs: ["push"] },
+      { id: "tictac", name: "Tic-Tacs", category: "tier2", level: 2, description: "Pivot turns", tips: "Swing your shoulders first.", prereqs: ["push"] },
+      { id: "kickturn", name: "Kickturn", category: "tier2", level: 2, description: "Pivot turns", tips: "Look where you want to go.", prereqs: ["push", "tictac"] },
+      { id: "hippie jump", name: "Hippie Jump", category: "tier2", level: 2, description: "jump into the air land on the bolts", tips: "be confident.", prereqs: ["push", "falling"] },
+      { id: "ride switch", name: "Switch", category: "tier2", level: 2, description: "Ride opposite", tips: "Feels weird at first!", prereqs: ["push"] },
+      { id: "caveman", name: "Caveman", category: "tier3", level: 3, description: "jumping onto the board", tips: "trick done by jumping onto one's board", prereqs: ["stance"] },
+      { id: "spine transfer", name: "Spine Transfer", category: "tier3", level: 3, description: "over a spine", tips: "fly over the spine", prereqs: ["push", "tictac"] },
+      { id: "boneless", name: "Boneless", category: "tier3", level: 3, description: "kick of the ground", tips: "Hold the board an jump kick of the ground", prereqs: ["push", "tictac"] },
+      { id: "fly out", name: "Fly Out", category: "tier3", level: 3, description: "up a ramp", tips: "up a ramp land on a flat", prereqs: ["push", "tictac"] },
+      { id: "roll in", name: "Roll in", category: "tier3", level: 3, description: "Rolling into a ramp", tips: "Commit weight forward.", prereqs: ["push"] },
+      { id: "drop-in", name: "Drop-In", category: "tier3", level: 3, description: "Entering from coping", tips: "Slam front wheels down!", prereqs: ["stop"] },
+      { id: "rock to fakie", name: "Rock to Fakie", category: "tier4", level: 4, description: "Ramp stall", tips: "Pass front trucks over lip.", prereqs: ["drop-in"] },
+      { id: "manual", name: "Manual", category: "tier4", level: 4, description: "Balance on 2 wheels", tips: "Use your arms for balance.", prereqs: ["tictac"] },
+      { id: "ollie", name: "Ollie", category: "tier4", level: 4, description: "Jump with board", tips: "Pop down, slide up.", prereqs: ["push", "tictac", "stop"] },
+      { id: "shuvit", name: "Shuvit", category: "tier5", level: 5, description: "180 board spin", tips: "Scoop the tail back.", prereqs: ["push"] },
+      { id: "kickflip", name: "Kickflip", category: "tier5", level: 5, description: "Classic flip", tips: "Flick the pocket.", prereqs: ["ollie"] }
     ];
 
-    const CATEGORIES = { basics: { name: 'Basics', icon: '🛹' }, fundamentals: { name: 'Fundamentals', icon: '⭐' }, flips: { name: 'Flips', icon: '🔄' }, transition: { name: 'Transition', icon: '🏄' } };
+    // Updated Categories to Tiers
+    const CATEGORIES = { 
+        tier1: { name: 'Tier 1', icon: '🔰' }, 
+        tier2: { name: 'Tier 2', icon: '🛹' }, 
+        tier3: { name: 'Tier 3', icon: '⭐' }, 
+        tier4: { name: 'Tier 4', icon: '🔥' }, 
+        tier5: { name: 'Tier 5', icon: '🏆' } 
+    };
+
     let allStudents = JSON.parse(localStorage.getItem('skate_v3')) || [{ id: "s1", name: "New Skater", progress: {}, stance: "regular" }];
     let currentId = localStorage.getItem('skate_id_v3') || allStudents[0].id;
     let viewMode = 'grid';
@@ -125,7 +133,8 @@
 
     function renderGrid(student, searchTerm) {
       const container = document.getElementById('tree-container');
-      Object.keys(CATEGORIES).forEach(catKey => {
+      // Sort keys to ensure Tier 1 is always at the top
+      Object.keys(CATEGORIES).sort().forEach(catKey => {
         const catTricks = tricksData.filter(t => t.category === catKey && t.name.toLowerCase().includes(searchTerm));
         if (catTricks.length === 0) return;
         const section = document.createElement('div');
@@ -141,28 +150,49 @@
 
     function renderTree(student, searchTerm) {
       const container = document.getElementById('tree-container');
-      const nodeW = 130, nodeH = 50, padX = 20, padY = 60;
-      const svgW = Math.max(container.clientWidth, 700);
-      let nodesMarkup = '', linesMarkup = '';
+      const nodeW = 130, nodeH = 50, padX = 20, padY = 90;
+      const svgW = Math.max(container.clientWidth, 800);
+      
       const levels = {};
-      tricksData.forEach(t => { levels[t.level] = levels[t.level] || []; levels[t.level].push(t); });
+      tricksData.forEach(t => { 
+        levels[t.level] = levels[t.level] || []; 
+        levels[t.level].push(t); 
+      });
+
+      const sortedLevelKeys = Object.keys(levels).sort((a, b) => a - b);
       const pos = {};
-      Object.keys(levels).forEach((lvl, rowIdx) => {
+      
+      sortedLevelKeys.forEach((lvl, rowIdx) => {
         const row = levels[lvl];
         const startX = (svgW - (row.length * (nodeW + padX))) / 2;
-        row.forEach((t, colIdx) => { pos[t.id] = { x: startX + colIdx * (nodeW + padX), y: rowIdx * (nodeH + padY) + 20 }; });
+        row.forEach((t, colIdx) => { 
+          pos[t.id] = { x: startX + colIdx * (nodeW + padX), y: rowIdx * (nodeH + padY) + 40 }; 
+        });
       });
+
+      let nodesMarkup = '', linesMarkup = '';
       tricksData.forEach(t => {
         const p = pos[t.id];
+        if (!p) return;
         const unlocked = isUnlocked(t.id, student.progress);
         const ready = canUnlock(t, student.progress);
+        
         t.prereqs.forEach(pid => {
           const parent = pos[pid];
-          if (parent) linesMarkup += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${unlocked && isUnlocked(pid, student.progress) ? 'lit' : ''}" />`;
+          if (parent) {
+            linesMarkup += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${unlocked && isUnlocked(pid, student.progress) ? 'lit' : ''}" />`;
+          }
         });
-        nodesMarkup += `<g class="tree-node" onclick="openModal('${t.id}')"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" class="${unlocked ? 'node-unlocked' : (ready ? 'node-available' : 'node-locked')}" /><text x="${p.x + nodeW/2}" y="${p.y + 28}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text></g>`;
+
+        nodesMarkup += `<g class="tree-node" onclick="openModal('${t.id}')">
+          <rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" class="${unlocked ? 'node-unlocked' : (ready ? 'node-available' : 'node-locked')}" />
+          <text x="${p.x + nodeW/2}" y="${p.y + 28}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text>
+          <text x="${p.x + nodeW/2}" y="${p.y - 8}" text-anchor="middle" fill="#f97316" font-size="8" font-weight="black">TIER ${t.level}</text>
+        </g>`;
       });
-      container.innerHTML = `<div class="tree-view"><svg width="${svgW}" height="650" class="tree-svg">${linesMarkup}${nodesMarkup}</svg></div>`;
+
+      const dynamicHeight = sortedLevelKeys.length * (nodeH + padY) + 100;
+      container.innerHTML = `<div class="tree-view"><svg width="${svgW}" height="${dynamicHeight}" class="tree-svg">${linesMarkup}${nodesMarkup}</svg></div>`;
     }
 
     window.openModal = (id) => {
@@ -176,14 +206,23 @@
 
     window.toggleTrick = (id) => {
       const student = getStudent();
-      if (student.progress[id]) { delete student.progress[id]; tricksData.filter(t => t.prereqs.includes(id)).forEach(dep => { if(student.progress[dep.id]) delete student.progress[dep.id]; }); }
-      else { student.progress[id] = true; }
+      if (student.progress[id]) { 
+        delete student.progress[id]; 
+        tricksData.filter(t => t.prereqs.includes(id)).forEach(dep => { if(student.progress[dep.id]) delete student.progress[dep.id]; }); 
+      } else { 
+        student.progress[id] = true; 
+      }
       save(); render(); closeModal();
     };
 
     window.closeModal = () => document.getElementById('modal-overlay').classList.remove('open');
     window.toggleMenu = () => document.getElementById('dataMenu').classList.toggle('active');
-    window.setView = (v) => { viewMode = v; document.getElementById('btnGrid').className = v === 'grid' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800'; document.getElementById('btnTree').className = v === 'tree' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800'; render(); };
+    window.setView = (v) => { 
+      viewMode = v; 
+      document.getElementById('btnGrid').className = v === 'grid' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800'; 
+      document.getElementById('btnTree').className = v === 'tree' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800'; 
+      render(); 
+    };
     window.addNewStudent = () => { const n = prompt("Name:"); if (n) { const newS = { id: "s" + Date.now(), name: n, progress: {}, stance: "regular" }; allStudents.push(newS); currentId = newS.id; save(); init(); } };
     window.switchStudent = () => { currentId = document.getElementById('studentSelect').value; save(); render(); updateStanceButtons(); };
     window.deleteCurrentStudent = () => { if (allStudents.length > 1 && confirm("Delete?")) { allStudents = allStudents.filter(s => s.id !== currentId); currentId = allStudents[0].id; save(); init(); } };
