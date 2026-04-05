@@ -44,7 +44,7 @@
 <body class="min-h-screen pb-12">
   <div class="max-w-5xl mx-auto p-4">
     
-    <header class="flex justify-between items-center mb-6 bg-zinc-900 p-4 rounded-xl border border-zinc-800 relative">
+    <header class="flex flex-col md:flex-row justify-between items-center mb-6 bg-zinc-900 p-4 rounded-xl border border-zinc-800 relative gap-4">
       <div>
         <h1 class="text-xl font-black italic tracking-tighter uppercase leading-none">
           SKILL<span class="neon-orange">TREE</span>
@@ -52,10 +52,12 @@
         <p class="text-orange-500 text-[10px] font-bold uppercase tracking-[0.2em]">Progression Tracker</p>
       </div>
       
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         <select id="studentSelect" onchange="switchStudent()" class="bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-xs outline-none focus:ring-1 ring-orange-500"></select>
-        <button id="btnRegular" onclick="setStance('regular')" class="px-3 py-1 rounded-md text-[10px] font-black uppercase bg-blue-600 text-white">🟦 REGULAR</button>
-        <button id="btnGoofy" onclick="setStance('goofy')" class="px-3 py-1 rounded-md text-[10px] font-black uppercase bg-zinc-800">🟪 GOOFY</button>
+        <div class="flex bg-zinc-800 rounded-md p-1 border border-zinc-700">
+            <button id="btnRegular" onclick="setStance('regular')" class="px-3 py-1 rounded text-[10px] font-black uppercase transition-all">REGULAR</button>
+            <button id="btnGoofy" onclick="setStance('goofy')" class="px-3 py-1 rounded text-[10px] font-black uppercase transition-all">GOOFY</button>
+        </div>
         <button onclick="addNewStudent()" class="bg-white text-black px-3 py-1 rounded-md text-[10px] font-black uppercase hover:bg-orange-500 hover:text-white transition-colors">➕ Add Skater</button>
         
         <div class="relative">
@@ -100,20 +102,20 @@
 
   <script>
     const tricksData = [
-      { id: "stance", name: "Stance", category: "basics", level: 1, difficulty: 1, description: "Generating momentum", tips: "Keep weight on the front foot.", prereqs: [] },
-      { id: "push", name: "Pushing", category: "basics", level: 1, difficulty: 1, description: "Generating momentum", tips: "Keep weight on the front foot.", prereqs: [] },
+      { id: "stance", name: "Stance", category: "basics", level: 1, difficulty: 1, description: "Finding your natural footing.", tips: "Have someone push you from behind; the foot you land on is your lead foot.", prereqs: [] },
+      { id: "push", name: "Pushing", category: "basics", level: 1, difficulty: 1, description: "Generating momentum", tips: "Keep weight on the front foot.", prereqs: ["stance"] },
       { id: "stop", name: "Foot Brake", category: "basics", level: 1, difficulty: 1, description: "Controlled stopping", tips: "Drag your back sole lightly.", prereqs: ["push"] },
       { id: "tictac", name: "Tic-Tacs", category: "basics", level: 1, difficulty: 2, description: "Pivot turns", tips: "Swing your shoulders first.", prereqs: ["push"] },
       { id: "kickturn", name: "Kickturn", category: "basics", level: 1, difficulty: 2, description: "Pivot turns", tips: "Swing your shoulders first.", prereqs: ["push", "tictac"] },
-      { id: "ride switch", name: "Switch", category: "basics", level: 1, difficulty: 2, description: "ride opposite", tips: "be comfortable in your normal stance.", prereqs: ["push"] },
-      { id: "roll in", name: "Roll in", category: "basics", level: 1, difficulty: 2, description: "roll in a drop or ramp", tips: "be comfortable in your normal stance.", prereqs: ["push"] },
-      { id: "drop-in", name: "Drop-In", category: "transition", level: 2, difficulty: 4, description: "Entering the ramp", tips: "Slam those front wheels down hard!", prereqs: [] },
-      { id: "rock to fakie", name: "Rock to fakie", category: "transition", level: 2, difficulty: 4, description: "Entering the ramp", tips: "As you get to the top, let your front trucks pass over the lip ", prereqs: [drop-in] },
+      { id: "ride switch", name: "Switch", category: "basics", level: 1, difficulty: 2, description: "Ride opposite", tips: "Be comfortable in your normal stance first.", prereqs: ["push"] },
+      { id: "roll in", name: "Roll in", category: "basics", level: 1, difficulty: 2, description: "Rolling into a ramp", tips: "Commit your weight forward.", prereqs: ["push"] },
+      { id: "drop-in", name: "Drop-In", category: "transition", level: 2, difficulty: 4, description: "Entering the ramp from the coping", tips: "Slam those front wheels down hard!", prereqs: [] },
+      { id: "rock to fakie", name: "Rock to Fakie", category: "transition", level: 2, difficulty: 4, description: "A classic ramp stall", tips: "Let your front trucks pass over the lip, then pull back.", prereqs: ["drop-in"] },
       { id: "manual", name: "Manual", category: "fundamentals", level: 2, difficulty: 3, description: "Balance on back wheels", tips: "Find the 'sweet spot' in your trucks.", prereqs: ["tictac"] },
       { id: "ollie", name: "Ollie", category: "fundamentals", level: 2, difficulty: 5, description: "Jumping with the board", tips: "Pop down, slide up.", prereqs: ["stance", "push", "tictac", "stop"] },
-      { id: "nollie shuvit", name: "Nollie shuvit", category: "basics", level: 1, difficulty: 2, description: "180 board spin", tips: "Scoop the nose straight back.", prereqs: [] },
-      { id: "shuvit", name: "Shuvit", category: "basics", level: 1, difficulty: 2, description: "180 board spin", tips: "Scoop the tail straight back.", prereqs: [] },
-      { id: "kickflip", name: "Kickflip", category: "flips", level: 5, difficulty: 7, description: "The classic flip", tips: "Flick out and up towards the nose.", prereqs: ["ollie"] }
+      { id: "nollie shuvit", name: "Nollie Shuvit", category: "basics", level: 1, difficulty: 2, description: "180 board spin from the nose", tips: "Scoop the nose straight back.", prereqs: ["push"] },
+      { id: "shuvit", name: "Shuvit", category: "basics", level: 1, difficulty: 2, description: "180 board spin", tips: "Scoop the tail straight back.", prereqs: ["push"] },
+      { id: "kickflip", name: "Kickflip", category: "flips", level: 5, difficulty: 7, description: "The classic flip", tips: "Flick out and up towards the nose pocket.", prereqs: ["ollie"] }
     ];
 
     const CATEGORIES = {
@@ -132,7 +134,7 @@
 
     const isUnlocked = (id, progress) => !!progress[id];
     const canUnlock = (trick, progress) => trick.prereqs.every(p => isUnlocked(p, progress));
-    const getPrereqNames = (ids) => ids.map(id => tricksData.find(t => t.id === id)?.name).join(", ");
+    const getPrereqNames = (ids) => ids.map(id => tricksData.find(t => t.id === id)?.name).filter(n => n).join(", ");
 
     function render() {
       const student = getStudent();
@@ -211,6 +213,7 @@
         const rectClass = unlocked ? 'node-unlocked' : (ready ? 'node-available' : 'node-locked');
         t.prereqs.forEach(pid => {
           const parent = pos[pid];
+          if (!parent) return;
           const lineLit = unlocked && isUnlocked(pid, student.progress) ? 'lit' : '';
           linesMarkup += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${lineLit}" />`;
         });
@@ -221,7 +224,7 @@
           </g>
         `;
       });
-      container.innerHTML = `<div class="tree-view"><svg width="${svgW}" height="${500}" class="tree-svg">${linesMarkup}${nodesMarkup}</svg></div>`;
+      container.innerHTML = `<div class="tree-view"><svg width="${svgW}" height="${600}" class="tree-svg">${linesMarkup}${nodesMarkup}</svg></div>`;
     }
 
     window.openModal = (id) => {
@@ -263,6 +266,7 @@
 
     window.closeModal = () => document.getElementById('modal-overlay').classList.remove('open');
     window.toggleMenu = () => document.getElementById('dataMenu').classList.toggle('active');
+    
     window.setView = (v) => { 
       viewMode = v; 
       document.getElementById('btnGrid').className = v === 'grid' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800';
@@ -280,7 +284,13 @@
       }
     };
 
-    window.switchStudent = () => { currentId = document.getElementById('studentSelect').value; save(); render(); updateStanceButtons(); };
+    window.switchStudent = () => { 
+        currentId = document.getElementById('studentSelect').value; 
+        save(); 
+        render(); 
+        updateStanceButtons(); 
+    };
+
     window.deleteCurrentStudent = () => {
       if (allStudents.length <= 1) return alert("Cannot delete the only skater.");
       if (confirm("Delete this profile?")) {
@@ -323,8 +333,14 @@
     function updateStanceButtons() {
       const student = getStudent();
       const isRegular = student.stance === 'regular';
-      document.getElementById('btnRegular').className = isRegular ? 'px-3 py-1 rounded-md text-[10px] font-black uppercase bg-blue-600 text-white' : 'px-3 py-1 rounded-md text-[10px] font-black uppercase bg-zinc-800';
-      document.getElementById('btnGoofy').className = !isRegular ? 'px-3 py-1 rounded-md text-[10px] font-black uppercase bg-purple-600 text-white' : 'px-3 py-1 rounded-md text-[10px] font-black uppercase bg-zinc-800';
+      
+      document.getElementById('btnRegular').className = isRegular 
+        ? 'px-3 py-1 rounded text-[10px] font-black uppercase bg-blue-600 text-white' 
+        : 'px-3 py-1 rounded text-[10px] font-black uppercase bg-zinc-800 text-zinc-400';
+        
+      document.getElementById('btnGoofy').className = !isRegular 
+        ? 'px-3 py-1 rounded text-[10px] font-black uppercase bg-purple-600 text-white' 
+        : 'px-3 py-1 rounded text-[10px] font-black uppercase bg-zinc-800 text-zinc-400';
     }
 
     function init() {
