@@ -76,7 +76,7 @@
 
 <script>
     const tricksData = [
-      { id: "stance", name: "Stance", category: "Basics", level: 1, description: "Finding your natural footing.", tips: "Which foot feels best forward?", prereqs: [], imageTag: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Skateboard_Stances.jpg/640px-Skateboard_Stances.jpg" },
+      { id: "stance", name: "Stance", category: "Basics", level: 1, description: "Finding your natural footing.", tips: "Which foot feels best forward?", prereqs: [] },
       { id: "push", name: "Pushing", category: "Basics", level: 1, description: "Generating momentum.", tips: "Keep weight on the front foot.", prereqs: ["stance"] },
       { id: "stop", name: "Foot Brake", category: "Basics", level: 1, description: "Controlled stopping.", tips: "Drag your back sole lightly.", prereqs: ["push"] },
       { id: "pumping", name: "Pumping", category: "Basics", level: 1, description: "Speed in transitions.", tips: "Bend knees at bottom, extend on way up.", prereqs: ["push"] },
@@ -99,7 +99,7 @@
       { id: "boneless", name: "Boneless", category: "Intermediate", level: 3, description: "Grab, plant, jump.", tips: "Plant front foot and jump.", prereqs: ["tictac"] },
       { id: "spine transfer", name: "Spine Transfer", category: "Intermediate", level: 3, description: "Over a spine peak.", tips: "Lean forward over peak.", prereqs: ["fly out"] },
       { id: "kickflip", name: "Kickflip", category: "Advanced", level: 4, description: "Axis flip.", tips: "Flick off the pocket.", prereqs: ["ollie"] },
-      { id: "placeholder", name: "Placeholder", category: "Pro", level: 5, description: "Top-tier challenge.", tips: "Eyes on the prize.", prereqs: ["kickflip"] }
+      { id: "pro_placeholder", name: "Pro Skill", category: "Pro", level: 5, description: "High-level maneuver.", tips: "Stay focused.", prereqs: ["kickflip"] }
     ];
 
     const getLevelName = (lvl) => {
@@ -129,211 +129,37 @@
 
     function renderGrid(student, searchTerm) {
       const container = document.getElementById('tree-container');
-      const cats = [...new Set(tricksData.map(t => t.category))];
-      cats.forEach(cat => {
-        const catTricks = tricksData.filter(t => t.category.toLowerCase() === cat.toLowerCase() && t.name.toLowerCase().includes(searchTerm));
-        if (catTricks.length === 0) return;
+      // Get unique levels and sort them
+      const levels = [...new Set(tricksData.map(t => t.level))].sort((a,b) => a - b);
+      
+      levels.forEach(lvl => {
+        const lvlTricks = tricksData.filter(t => t.level === lvl && t.name.toLowerCase().includes(searchTerm));
+        if (lvlTricks.length === 0) return;
+        
         const section = document.createElement('div');
         section.className = "mb-8";
-        section.innerHTML = `<div class="flex items-center gap-2 mb-4"><h2 class="font-black italic uppercase text-xs tracking-widest text-zinc-500">${cat.toUpperCase()}</h2><div class="h-px flex-1 bg-zinc-800"></div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-3">${catTricks.map(t => {
-          const unlocked = isUnlocked(t.id, student.progress);
-          const ready = canUnlock(t, student.progress);
-          return `<div onclick="openModal('${t.id}')" class="trick-card p-3 cursor-pointer ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}"><div><div class="flex justify-between items-start mb-1"><span class="text-[9px] font-bold text-zinc-600 uppercase">LVL ${t.level}</span>${unlocked ? '✅' : (ready ? '' : '🔒')}</div><h3 class="font-bold text-xs uppercase">${t.name}</h3></div>${(!unlocked && t.prereqs.length > 0) ? `<div class="mt-2 text-[8px] font-bold text-zinc-500 uppercase">Needs: ${getPrereqNames(t.prereqs)}</div>` : ''}</div>`;
-        }).join('')}</div>`;
-        container.appendChild(section);
-      });
-    }
-
-    function renderTree(student, searchTerm) {
-      const container = document.getElementById('tree-container');
-      const nodeW = 110, nodeH = 40, padX = 40, padY = 80;
-      const levels = {};
-      tricksData.forEach(t => { levels[t.level] = levels[t.level] || []; levels[t.level].push(t); });
-      const sortedLevelKeys = Object.keys(levels).sort((a, b) => a - b);
-      
-      const pos = {};
-      let maxRowWidth = 0;
-      sortedLevelKeys.forEach((lvl, rowIdx) => {
-        const row = levels[lvl];
-        const rowWidth = row.length * (nodeW + padX);
-        if (rowWidth > maxRowWidth) maxRowWidth = rowWidth;
-        const rowStartX = (maxRowWidth - rowWidth) / 2;
-        row.forEach((t, colIdx) => { pos[t.id] = { x: rowStartX + colIdx * (nodeW + padX), y: rowIdx * (nodeH + padY) + 60 }; });
-      });
-
-      const totalW = maxRowWidth;
-      const totalH = sortedLevelKeys.length * (nodeH + padY) + 100;
-
-      let nodesMarkup = '', linesMarkup = '';
-      sortedLevelKeys.forEach((lvl, rowIdx) => {
-          const rowY = rowIdx * (nodeH + padY) + 60;
-          nodesMarkup += `<text x="0" y="${rowY - 15}" fill="#f97316" font-size="10" font-weight="black" class="uppercase italic tracking-widest">${getLevelName(lvl)}</text><line x1="0" y1="${rowY - 10}" x2="${totalW}" y2="${rowY - 10}" stroke="#27272a" stroke-dasharray="4" />`;
-      });
-
-      tricksData.forEach(t => {
-        const p = pos[t.id];
-        const unlocked = isUnlocked(t.id, student.progress);
-        const ready = canUnlock(t, student.progress);
-        const matchesSearch = t.name.toLowerCase().includes(searchTerm);
-        t.prereqs.forEach(pid => {
-          const parent = pos[pid];
-          if (parent) linesMarkup += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${unlocked && isUnlocked(pid, student.progress) ? 'lit' : ''}" style="stroke: ${unlocked ? '#22c55e' : '#333'}; opacity: ${matchesSearch ? 1 : 0.2}" />`;
-        });
-        nodesMarkup += `<g class="tree-node" onclick="openModal('${t.id}')" style="opacity: ${matchesSearch ? 1 : 0.2}"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" class="${unlocked ? 'node-unlocked' : (ready ? 'node-available' : 'node-locked')}" /><text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 5}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text></g>`;
-      });
-
-      container.innerHTML = `<div class="tree-container-wrapper"><svg viewBox="-20 0 ${totalW + 40} ${totalH}" class="tree-svg">${linesMarkup}${nodesMarkup}</svg></div>`;
-    }
-
-    window.openModal = (id) => {
-      const t = tricksData.find(x => x.id === id);
-      const student = getStudent();
-      const unlocked = isUnlocked(id, student.progress);
-      const ready = canUnlock(t, student.progress);
-      let visualContent = t.imageTag && t.imageTag.startsWith('http') ? `<img src="${t.imageTag}" class="w-full h-full object-cover">` : `<div class="text-center p-4"><span class="text-2xl mb-2 block">📷</span><span class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">No Image Yet</span></div>`;
-
-      document.getElementById('modal-content').innerHTML = `
-        <h2 class="text-xl font-black italic neon-orange uppercase mb-1">${t.name}</h2>
-        ${t.prereqs.length > 0 ? `<div class="text-[10px] font-black uppercase text-zinc-500 mb-2">Needs: ${getPrereqNames(t.prereqs)}</div>` : ''}
-        <div class="my-4 aspect-video bg-zinc-800 rounded-lg flex items-center justify-center border border-zinc-700 overflow-hidden">${visualContent}</div>
-        <p class="text-zinc-400 text-sm mb-4">${t.description}</p>
-        <div class="bg-black/40 p-4 rounded-xl border border-zinc-800 mb-6"><strong class="text-orange-500 text-[10px] uppercase block mb-1">Coach Tips:</strong><p class="text-xs italic">"${t.tips}"</p></div>
-        <div class="flex gap-2">
-            ${unlocked ? `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-zinc-800 rounded-lg font-bold text-xs">UNLEARN</button>` : (ready ? `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-orange-600 rounded-lg font-bold text-xs">LEARNED</button>` : `<button class="flex-1 py-3 bg-zinc-800 text-zinc-600 rounded-lg font-bold text-xs cursor-not-allowed">LOCKED</button>`)}
-            <button onclick="closeModal()" class="px-4 py-3 bg-zinc-700 rounded-lg font-bold text-xs">CLOSE</button>
-        </div>`;
-      document.getElementById('modal-overlay').classList.add('open');
-    };
-
-    window.toggleTrick = (id) => {
-      const student = getStudent();
-      if (student.progress[id]) { 
-        delete student.progress[id]; 
-        tricksData.filter(t => t.prereqs.includes(id)).forEach(dep => { if(student.progress[dep.id]) delete student.progress[dep.id]; }); 
-      } else { student.progress[id] = true; }
-      save(); render(); closeModal();
-    };
-
-    window.closeModal = () => document.getElementById('modal-overlay').classList.remove('open');
-    window.toggleMenu = () => document.getElementById('dataMenu').classList.toggle('active');
-    window.setView = (v) => { viewMode = v; document.getElementById('btnGrid').className = v === 'grid' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800'; document.getElementById('btnTree').className = v === 'tree' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800'; render(); };
-    window.addNewStudent = () => { const n = prompt("Name:"); if (n) { const newS = { id: "s" + Date.now(), name: n, progress: {}, stance: "regular" }; allStudents.push(newS); currentId = newS.id; save(); init(); } };
-    window.switchStudent = () => { currentId = document.getElementById('studentSelect').value; save(); render(); updateStanceButtons(); };
-    window.deleteCurrentStudent = () => { if (allStudents.length > 1 && confirm("Delete?")) { allStudents = allStudents.filter(s => s.id !== currentId); currentId = allStudents[0].id; save(); init(); } };
-    window.exportJSON = () => { const blob = new Blob([JSON.stringify(allStudents)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'skate.json'; a.click(); };
-    window.importJSON = () => { const input = document.createElement('input'); input.type = 'file'; input.onchange = e => { const reader = new FileReader(); reader.onload = ev => { allStudents = JSON.parse(ev.target.result); currentId = allStudents[0].id; save(); init(); }; reader.readAsText(e.target.files[0]); }; input.click(); };
-    window.setStance = (s) => { const student = getStudent(); student.stance = s; save(); updateStanceButtons(); };
-    function updateStanceButtons() { const s = getStudent(); document.getElementById('btnRegular').className = s.stance === 'regular' ? 'px-3 py-1 rounded text-[10px] font-black bg-blue-600' : 'px-3 py-1 rounded text-[10px] font-black bg-zinc-800 text-zinc-400'; document.getElementById('btnGoofy').className = s.stance === 'goofy' ? 'px-3 py-1 rounded text-[10px] font-black bg-purple-600' : 'px-3 py-1 rounded text-[10px] font-black bg-zinc-800 text-zinc-400'; }
-    function init() { const sel = document.getElementById('studentSelect'); sel.innerHTML = allStudents.map(s => `<option value="${s.id}" ${s.id === currentId ? 'selected' : ''}>${s.name.toUpperCase()}</option>`).join(''); render(); updateStanceButtons(); }
-    init();
-</script>
-</body>
-</html>        <p class="text-orange-500 text-[10px] font-bold uppercase tracking-[0.2em]">Classes</p>
-      </div>
-      <div class="flex flex-wrap items-center gap-2">
-        <select id="studentSelect" onchange="switchStudent()" class="bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-xs outline-none"></select>
-        <div class="flex bg-zinc-800 rounded-md p-1 border border-zinc-700">
-            <button id="btnRegular" onclick="setStance('regular')" class="px-3 py-1 rounded text-[10px] font-black uppercase">REGULAR</button>
-            <button id="btnGoofy" onclick="setStance('goofy')" class="px-3 py-1 rounded text-[10px] font-black uppercase">GOOFY</button>
-        </div>
-        <button onclick="addNewStudent()" class="bg-white text-black px-3 py-1 rounded-md text-[10px] font-black uppercase hover:bg-orange-500 hover:text-white">➕ Add Skater</button>
-        <div class="relative">
-          <button onclick="toggleMenu()" class="bg-zinc-800 text-zinc-400 px-3 py-1 rounded-md text-[10px] font-bold border border-zinc-700">SETTINGS ⚙️</button>
-          <div id="dataMenu" class="menu-panel p-2 shadow-2xl">
-            <button onclick="exportJSON()" class="w-full text-left text-[11px] py-2 px-2 border-b border-zinc-700">📤 Export</button>
-            <button onclick="importJSON()" class="w-full text-left text-[11px] py-2 px-2 border-b border-zinc-700">📥 Import</button>
-            <button onclick="deleteCurrentStudent()" class="w-full text-left text-[11px] py-2 px-2 text-red-500">🗑️ Delete</button>
+        section.innerHTML = `
+          <div class="flex items-center gap-2 mb-4">
+            <h2 class="font-black italic uppercase text-xs tracking-widest text-zinc-500">${getLevelName(lvl)}</h2>
+            <div class="h-px flex-1 bg-zinc-800"></div>
           </div>
-        </div>
-      </div>
-    </header>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <div class="flex gap-6 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-        <div class="stat"><div class="text-zinc-500 text-[10px] font-bold uppercase">Mastered</div><div id="statsProgress" class="text-2xl font-black neon-orange">0/0</div></div>
-        <div class="stat"><div class="text-zinc-500 text-[10px] font-bold uppercase">Ready</div><div id="statsAvail" class="text-2xl font-black text-white">0</div></div>
-      </div>
-      <div class="flex flex-col gap-2">
-        <div class="flex gap-2">
-          <button id="btnGrid" onclick="setView('grid')" class="flex-1 py-2 rounded-md text-xs font-bold bg-orange-600">📋 GRID</button>
-          <button id="btnTree" onclick="setView('tree')" class="flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800">🌳 TREE</button>
-        </div>
-        <input type="text" id="search" placeholder="Search tricks..." oninput="render()" class="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2 text-sm outline-none">
-      </div>
-    </div>
-    <div id="tree-container"></div>
-  </div>
-
-  <div class="modal-overlay" id="modal-overlay" onclick="if(event.target==this) closeModal()">
-    <div class="bg-zinc-900 border border-zinc-700 p-6 rounded-2xl max-w-md w-full shadow-2xl" id="modal-content"></div>
-  </div>
-
-<script>
-    const tricksData = [
-      { id: "stance", name: "Stance", category: "Basics", level: 1, description: "Finding your natural footing.", tips: "Which foot feels best forward?", prereqs: [], imageTag: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Skateboard_Stances.jpg/640px-Skateboard_Stances.jpg" },
-      { id: "push", name: "Pushing", category: "Basics", level: 1, description: "Generating momentum.", tips: "Keep weight on the front foot.", prereqs: ["stance"] },
-      { id: "stop", name: "Foot Brake", category: "Basics", level: 1, description: "Controlled stopping.", tips: "Drag your back sole lightly.", prereqs: ["push"] },
-      { id: "pumping", name: "Pumping", category: "Basics", level: 1, description: "Speed in transitions.", tips: "Bend knees at bottom, extend on way up.", prereqs: ["push"] },
-      { id: "falling", name: "Falling", category: "Basics", level: 1, description: "Controlled Falling.", tips: "Tuck and roll, don't use hands.", prereqs: [] },
-      { id: "turning", name: "Turning", category: "Basics", level: 1, description: "Basic leaning turns.", tips: "Lean into toes or heels.", prereqs: ["push"] },
-      { id: "tictac", name: "Tic-Tacs", category: "Basics", level: 1, description: "Small pivot turns.", tips: "Swing shoulders first.", prereqs: ["push"] },
-      { id: "kickturn", name: "Kickturn", category: "Fundamentals", level: 2, description: "Pivot turns on ramp/flat.", tips: "Point your front shoulder.", prereqs: ["push", "tictac"] },
-      { id: "running start", name: "Running Start", category: "Fundamentals", level: 2, description: "Run and jump on.", tips: "Look where you want to go.", prereqs: ["push"] },
-      { id: "hippie jump", name: "Hippie Jump", category: "Fundamentals", level: 2, description: "Jump and land on bolts.", tips: "Stay balanced over center.", prereqs: ["push", "falling"] },
-      { id: "ride switch", name: "Switch", category: "Fundamentals", level: 2, description: "Non-natural stance.", tips: "Pretend you're starting over!", prereqs: ["push"] },
-      { id: "roll in", name: "Roll in", category: "Fundamentals", level: 2, description: "Rolling into a ramp.", tips: "Commit weight forward!", prereqs: ["push"] },
-      { id: "drop-in", name: "Drop-In", category: "Fundamentals", level: 2, description: "Entering from coping.", tips: "Slam those front wheels down!", prereqs: ["stop"] },
-      { id: "manual", name: "Manual", category: "Fundamentals", level: 2, description: "2-wheel balance.", tips: "Use arms for balance.", prereqs: ["tictac"] },
-      { id: "ollie", name: "Ollie", category: "Fundamentals", level: 2, description: "Foundation jump.", tips: "Pop tail hard, slide foot up.", prereqs: ["push", "tictac", "stop"] },
-      { id: "shuvit", name: "Shuvit", category: "Fundamentals", level: 2, description: "180 board spin.", tips: "Scoop the tail back.", prereqs: ["push"] },
-      { id: "nollie shuvit", name: "Nollie Shuvit", category: "Fundamentals", level: 2, description: "Front-foot scoop.", tips: "Pop the nose.", prereqs: ["shuvit"] },
-      { id: "caveman", name: "Caveman", category: "Intermediate", level: 3, description: "Jump onto board.", tips: "Hold nose, jump, and place.", prereqs: ["stance"] },
-      { id: "rock to fakie", name: "Rock to Fakie", category: "Intermediate", level: 3, description: "Stall and fakie out.", tips: "Lift front trucks over coping.", prereqs: ["drop-in"] },
-      { id: "fly out", name: "Fly Out", category: "Intermediate", level: 3, description: "Exit ramp to flat.", tips: "Level board in air.", prereqs: ["pumping"] },
-      { id: "boneless", name: "Boneless", category: "Intermediate", level: 3, description: "Grab, plant, jump.", tips: "Plant front foot and jump.", prereqs: ["tictac"] },
-      { id: "spine transfer", name: "Spine Transfer", category: "Intermediate", level: 3, description: "Over a spine peak.", tips: "Lean forward over peak.", prereqs: ["fly out"] },
-      { id: "kickflip", name: "Kickflip", category: "Advanced", level: 4, description: "Axis flip.", tips: "Flick off the pocket.", prereqs: ["ollie"] }
-      { id: "placeholder", name: "Placeholder", category: "pro", level: 5, description: "Grab, plant, jump.", tips: "Plant front foot and jump.", prereqs: ["tictac"] },
-    ];
-
-    const getLevelName = (lvl) => {
-        const names = { 1: "BASICS", 2: "FUNDAMENTALS", 3: "INTERMEDIATE", 4: "ADVANCED", 5: "PRO" };
-        return names[lvl] || `LEVEL ${lvl}`;
-    };
-
-    let allStudents = JSON.parse(localStorage.getItem('skate_v3')) || [{ id: "s1", name: "New Skater", progress: {}, stance: "regular" }];
-    let currentId = localStorage.getItem('skate_id_v3') || allStudents[0].id;
-    let viewMode = 'grid';
-
-    function getStudent() { return allStudents.find(s => s.id === currentId) || allStudents[0]; }
-    function save() { localStorage.setItem('skate_v3', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v3', currentId); }
-    const isUnlocked = (id, progress) => !!progress[id];
-    const canUnlock = (trick, progress) => trick.prereqs.every(p => isUnlocked(p, progress));
-    const getPrereqNames = (ids) => ids.map(id => tricksData.find(t => t.id === id)?.name).filter(n => n).join(", ");
-
-    function render() {
-      const student = getStudent();
-      const searchTerm = document.getElementById('search').value.toLowerCase();
-      const container = document.getElementById('tree-container');
-      container.innerHTML = '';
-      document.getElementById('statsProgress').textContent = `${Object.keys(student.progress).length}/${tricksData.length}`;
-      document.getElementById('statsAvail').textContent = tricksData.filter(t => !isUnlocked(t.id, student.progress) && canUnlock(t, student.progress)).length;
-      if (viewMode === 'grid') renderGrid(student, searchTerm); else renderTree(student, searchTerm);
-    }
-
-    function renderGrid(student, searchTerm) {
-      const container = document.getElementById('tree-container');
-      const cats = [...new Set(tricksData.map(t => t.category))];
-      cats.forEach(cat => {
-        const catTricks = tricksData.filter(t => t.category === cat && t.name.toLowerCase().includes(searchTerm));
-        if (catTricks.length === 0) return;
-        const section = document.createElement('div');
-        section.className = "mb-8";
-        section.innerHTML = `<div class="flex items-center gap-2 mb-4"><h2 class="font-black italic uppercase text-xs tracking-widest text-zinc-500">${cat.toUpperCase()}</h2><div class="h-px flex-1 bg-zinc-800"></div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-3">${catTricks.map(t => {
-          const unlocked = isUnlocked(t.id, student.progress);
-          const ready = canUnlock(t, student.progress);
-          return `<div onclick="openModal('${t.id}')" class="trick-card p-3 cursor-pointer ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}"><div><div class="flex justify-between items-start mb-1"><span class="text-[9px] font-bold text-zinc-600 uppercase">LVL ${t.level}</span>${unlocked ? '✅' : (ready ? '' : '🔒')}</div><h3 class="font-bold text-xs uppercase">${t.name}</h3></div>${(!unlocked && t.prereqs.length > 0) ? `<div class="mt-2 text-[8px] font-bold text-zinc-500 uppercase">Needs: ${getPrereqNames(t.prereqs)}</div>` : ''}</div>`;
-        }).join('')}</div>`;
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            ${lvlTricks.map(t => {
+              const unlocked = isUnlocked(t.id, student.progress);
+              const ready = canUnlock(t, student.progress);
+              return `
+                <div onclick="openModal('${t.id}')" class="trick-card p-3 cursor-pointer ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}">
+                  <div>
+                    <div class="flex justify-between items-start mb-1">
+                      <span class="text-[9px] font-bold text-zinc-600 uppercase">LVL ${t.level}</span>
+                      ${unlocked ? '✅' : (ready ? '' : '🔒')}
+                    </div>
+                    <h3 class="font-bold text-xs uppercase">${t.name}</h3>
+                  </div>
+                  ${(!unlocked && t.prereqs.length > 0) ? `<div class="mt-2 text-[8px] font-bold text-zinc-500 uppercase">Needs: ${getPrereqNames(t.prereqs)}</div>` : ''}
+                </div>`;
+            }).join('')}
+          </div>`;
         container.appendChild(section);
       });
     }
@@ -384,13 +210,11 @@
       const student = getStudent();
       const unlocked = isUnlocked(id, student.progress);
       const ready = canUnlock(t, student.progress);
-      let visualContent = t.imageTag && t.imageTag.startsWith('http') ? `<img src="${t.imageTag}" class="w-full h-full object-cover">` : `<div class="text-center p-4"><span class="text-2xl mb-2 block">📷</span><span class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">No Image Yet</span></div>`;
 
       document.getElementById('modal-content').innerHTML = `
         <h2 class="text-xl font-black italic neon-orange uppercase mb-1">${t.name}</h2>
         ${t.prereqs.length > 0 ? `<div class="text-[10px] font-black uppercase text-zinc-500 mb-2">Needs: ${getPrereqNames(t.prereqs)}</div>` : ''}
-        <div class="my-4 aspect-video bg-zinc-800 rounded-lg flex items-center justify-center border border-zinc-700 overflow-hidden">${visualContent}</div>
-        <p class="text-zinc-400 text-sm mb-4">${t.description}</p>
+        <p class="text-zinc-400 text-sm mb-4 mt-4">${t.description}</p>
         <div class="bg-black/40 p-4 rounded-xl border border-zinc-800 mb-6"><strong class="text-orange-500 text-[10px] uppercase block mb-1">Coach Tips:</strong><p class="text-xs italic">"${t.tips}"</p></div>
         <div class="flex gap-2">
             ${unlocked ? `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-zinc-800 rounded-lg font-bold text-xs">UNLEARN</button>` : (ready ? `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-orange-600 rounded-lg font-bold text-xs">LEARNED</button>` : `<button class="flex-1 py-3 bg-zinc-800 text-zinc-600 rounded-lg font-bold text-xs cursor-not-allowed">LOCKED</button>`)}
