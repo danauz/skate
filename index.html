@@ -76,33 +76,32 @@
 
   <div class="modal-overlay" id="modal-overlay"><div class="bg-zinc-900 border border-zinc-700 p-6 rounded-2xl max-w-md w-full shadow-2xl" id="modal-content"></div></div>
 
-  <script>
+<script>
     const tricksData = [
-      { id: "stance", name: "Stance", category: "tier1", level: 1, description: "Finding your natural footing.", tips: "Which foot feels best forward?", prereqs: [] },
-      { id: "push", name: "Pushing", category: "tier1", level: 1, description: "Generating momentum", tips: "Keep weight on the front foot.", prereqs: ["stance"] },
-      { id: "stop", name: "Foot Brake", category: "tier1", level: 1, description: "Controlled stopping", tips: "Drag your back sole lightly.", prereqs: ["push"] },
-      { id: "pumping", name: "Pumping", category: "tier1", level: 1, description: "Generating momentum", tips: "Bend your knees slightly", prereqs: ["push"] },
-      { id: "falling", name: "Falling", category: "tier1", level: 1, description: "Controlled Falling", tips: "Roll with it.", prereqs: [] },
-      { id: "turning", name: "Turning", category: "tier1", level: 1, description: "Controlled turning", tips: "Lean", prereqs: ["push"] },
-      { id: "running start", name: "Running Start", category: "tier2", level: 2, description: "push the board then run and jump onto the board", tips: "Look where you want to go.", prereqs: ["push"] },
-      { id: "tictac", name: "Tic-Tacs", category: "tier2", level: 2, description: "Pivot turns", tips: "Swing your shoulders first.", prereqs: ["push"] },
-      { id: "kickturn", name: "Kickturn", category: "tier2", level: 2, description: "Pivot turns", tips: "Look where you want to go.", prereqs: ["push", "tictac"] },
-      { id: "hippie jump", name: "Hippie Jump", category: "tier2", level: 2, description: "jump into the air land on the bolts", tips: "be confident.", prereqs: ["push", "falling"] },
-      { id: "ride switch", name: "Switch", category: "tier2", level: 2, description: "Ride opposite", tips: "Feels weird at first!", prereqs: ["push"] },
-      { id: "caveman", name: "Caveman", category: "tier3", level: 3, description: "jumping onto the board", tips: "trick done by jumping onto one's board", prereqs: ["stance"] },
-      { id: "spine transfer", name: "Spine Transfer", category: "tier3", level: 3, description: "over a spine", tips: "fly over the spine", prereqs: ["push", "tictac"] },
-      { id: "boneless", name: "Boneless", category: "tier3", level: 3, description: "kick of the ground", tips: "Hold the board an jump kick of the ground", prereqs: ["push", "tictac"] },
-      { id: "fly out", name: "Fly Out", category: "tier3", level: 3, description: "up a ramp", tips: "up a ramp land on a flat", prereqs: ["push", "tictac"] },
-      { id: "roll in", name: "Roll in", category: "tier3", level: 3, description: "Rolling into a ramp", tips: "Commit weight forward.", prereqs: ["push"] },
-      { id: "drop-in", name: "Drop-In", category: "tier3", level: 3, description: "Entering from coping", tips: "Slam front wheels down!", prereqs: ["stop"] },
-      { id: "rock to fakie", name: "Rock to Fakie", category: "tier4", level: 4, description: "Ramp stall", tips: "Pass front trucks over lip.", prereqs: ["drop-in"] },
-      { id: "manual", name: "Manual", category: "tier4", level: 4, description: "Balance on 2 wheels", tips: "Use your arms for balance.", prereqs: ["tictac"] },
-      { id: "ollie", name: "Ollie", category: "tier4", level: 4, description: "Jump with board", tips: "Pop down, slide up.", prereqs: ["push", "tictac", "stop"] },
-      { id: "shuvit", name: "Shuvit", category: "tier5", level: 5, description: "180 board spin", tips: "Scoop the tail back.", prereqs: ["push"] },
-      { id: "kickflip", name: "Kickflip", category: "tier5", level: 5, description: "Classic flip", tips: "Flick the pocket.", prereqs: ["ollie"] }
+      { id: "stance", name: "Stance", category: "tier1", level: 1, description: "Finding your natural footing.", tips: "Which foot feels best forward?", prereqs: [], imageTag: "" },
+      { id: "push", name: "Pushing", category: "tier1", level: 1, description: "Generating momentum", tips: "Keep weight on the front foot.", prereqs: ["stance"], imageTag: "" },
+      { id: "stop", name: "Foot Brake", category: "tier1", level: 1, description: "Controlled stopping", tips: "Drag your back sole lightly.", prereqs: ["push"], imageTag: "" },
+      { id: "pumping", name: "Pumping", category: "tier1", level: 1, description: "Generating momentum in a transition.", tips: "Bend your knees at the bottom, extend on the way up.", prereqs: ["push"], imageTag: "" },
+      { id: "falling", name: "Falling", category: "tier1", level: 1, description: "Controlled Falling", tips: "Don't catch yourself with your hands; tuck and roll.", prereqs: [], imageTag: "" },
+      { id: "turning", name: "Turning", category: "tier1", level: 1, description: "Controlled turning", tips: "Lean into the toes or heels.", prereqs: ["push"], imageTag: "" },
+      { id: "running start", name: "Running Start", category: "tier2", level: 2, description: "Push the board then run and jump onto the bolts.", tips: "Look where you want to go.", prereqs: ["push"], imageTag: "" },
+      { id: "tictac", name: "Tic-Tacs", category: "tier2", level: 2, description: "Small pivot turns to build speed.", tips: "Swing your shoulders first.", prereqs: ["push"], imageTag: "" },
+      { id: "kickturn", name: "Kickturn", category: "tier2", level: 2, description: "Pivot turns on a ramp or flat.", tips: "Point your front shoulder where you want to go.", prereqs: ["push", "tictac"], imageTag: "" },
+      { id: "hippie jump", name: "Hippie Jump", category: "tier2", level: 2, description: "Jump into the air and land back on the bolts.", tips: "Start small and stay balanced over the center.", prereqs: ["push", "falling"], imageTag: "" },
+      { id: "ride switch", name: "Switch", category: "tier2", level: 2, description: "Riding in your non-natural stance.", tips: "It helps to pretend you're learning from scratch again!", prereqs: ["push"], imageTag: "" },
+      { id: "caveman", name: "Caveman", category: "tier3", level: 3, description: "Jumping onto the board from your hand.", tips: "Hold the nose, jump, and place the board under your feet.", prereqs: ["stance"], imageTag: "" },
+      { id: "spine transfer", name: "Spine Transfer", category: "tier3", level: 3, description: "Going over a spine ramp.", tips: "Maintain speed and lean forward as you clear the peak.", prereqs: ["push", "tictac"], imageTag: "" },
+      { id: "boneless", name: "Boneless", category: "tier3", level: 3, description: "Grab the board, plant one foot, and jump.", tips: "Plant your front foot and jump off it while pulling the board up.", prereqs: ["push", "tictac"], imageTag: "" },
+      { id: "fly out", name: "Fly Out", category: "tier3", level: 3, description: "Flying out of a ramp onto flat ground.", tips: "Keep the board leveled in the air.", prereqs: ["push", "tictac"], imageTag: "" },
+      { id: "roll in", name: "Roll in", category: "tier3", level: 3, description: "Rolling into a ramp from the deck.", tips: "Commit weight forward—don't lean back!", prereqs: ["push"], imageTag: "" },
+      { id: "drop-in", name: "Drop-In", category: "tier3", level: 3, description: "Entering a ramp from the coping.", tips: "Slam those front wheels down like you mean it!", prereqs: ["stop"], imageTag: "" },
+      { id: "rock to fakie", name: "Rock to Fakie", category: "tier4", level: 4, description: "Ramp stall and coming back backward.", tips: "Lift the front trucks slightly to clear the coping on the way back.", prereqs: ["drop-in"], imageTag: "" },
+      { id: "manual", name: "Manual", category: "tier4", level: 4, description: "Balancing on the two back wheels.", tips: "Find the 'sweet spot' and use your arms for balance.", prereqs: ["tictac"], imageTag: "" },
+      { id: "ollie", name: "Ollie", category: "tier4", level: 4, description: "The foundation of all flip tricks.", tips: "Pop the tail down hard and slide your front foot up.", prereqs: ["push", "tictac", "stop"], imageTag: "" },
+      { id: "shuvit", name: "Shuvit", category: "tier5", level: 5, description: "Spinning the board 180 degrees under your feet.", tips: "Scoop the tail back with your back foot.", prereqs: ["push"], imageTag: "" },
+      { id: "kickflip", name: "Kickflip", category: "tier5", level: 5, description: "Flipping the board along its axis.", tips: "Flick your front foot out and off the 'pocket' of the nose.", prereqs: ["ollie"], imageTag: "" }
     ];
 
-    // Updated Categories to Tiers
     const CATEGORIES = { 
         tier1: { name: 'Tier 1', icon: '🔰' }, 
         tier2: { name: 'Tier 2', icon: '🛹' }, 
@@ -133,7 +132,6 @@
 
     function renderGrid(student, searchTerm) {
       const container = document.getElementById('tree-container');
-      // Sort keys to ensure Tier 1 is always at the top
       Object.keys(CATEGORIES).sort().forEach(catKey => {
         const catTricks = tricksData.filter(t => t.category === catKey && t.name.toLowerCase().includes(searchTerm));
         if (catTricks.length === 0) return;
@@ -200,7 +198,29 @@
       const student = getStudent();
       const unlocked = isUnlocked(id, student.progress);
       const ready = canUnlock(t, student.progress);
-      document.getElementById('modal-content').innerHTML = `<h2 class="text-xl font-black italic neon-orange uppercase mb-1">${t.name}</h2>${t.prereqs.length > 0 ? `<div class="text-[10px] font-black uppercase text-zinc-500 mb-2">Needs: ${getPrereqNames(t.prereqs)}</div>` : ''}<p class="text-zinc-400 text-sm mb-4">${t.description}</p><div class="bg-black/40 p-4 rounded-xl border border-zinc-800 mb-6"><strong class="text-orange-500 text-[10px] uppercase block mb-1">Coach Tips:</strong><p class="text-xs italic">"${t.tips}"</p></div><div class="flex gap-2">${unlocked ? `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-zinc-800 rounded-lg font-bold text-xs">UNLEARN</button>` : (ready ? `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-orange-600 rounded-lg font-bold text-xs">LEARNED</button>` : `<button class="flex-1 py-3 bg-zinc-800 text-zinc-600 rounded-lg font-bold text-xs cursor-not-allowed">LOCKED</button>`)}<button onclick="closeModal()" class="px-4 py-3 bg-zinc-700 rounded-lg font-bold text-xs">CLOSE</button></div>`;
+      
+      // Modal content with placeholder for Visual Guide
+      document.getElementById('modal-content').innerHTML = `
+        <h2 class="text-xl font-black italic neon-orange uppercase mb-1">${t.name}</h2>
+        ${t.prereqs.length > 0 ? `<div class="text-[10px] font-black uppercase text-zinc-500 mb-2">Needs: ${getPrereqNames(t.prereqs)}</div>` : ''}
+        
+        <div class="my-4 aspect-video bg-zinc-800 rounded-lg flex items-center justify-center border border-zinc-700 overflow-hidden">
+            <div class="text-center p-4">
+                <span class="text-2xl mb-2 block">📷</span>
+                <span class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Visual Guide Placeholder</span>
+                <p class="text-[9px] text-zinc-600 mt-1 italic">${t.imageTag}</p>
+            </div>
+        </div>
+
+        <p class="text-zinc-400 text-sm mb-4">${t.description}</p>
+        <div class="bg-black/40 p-4 rounded-xl border border-zinc-800 mb-6">
+            <strong class="text-orange-500 text-[10px] uppercase block mb-1">Coach Tips:</strong>
+            <p class="text-xs italic">"${t.tips}"</p>
+        </div>
+        <div class="flex gap-2">
+            ${unlocked ? `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-zinc-800 rounded-lg font-bold text-xs">UNLEARN</button>` : (ready ? `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-orange-600 rounded-lg font-bold text-xs">LEARNED</button>` : `<button class="flex-1 py-3 bg-zinc-800 text-zinc-600 rounded-lg font-bold text-xs cursor-not-allowed">LOCKED</button>`)}
+            <button onclick="closeModal()" class="px-4 py-3 bg-zinc-700 rounded-lg font-bold text-xs">CLOSE</button>
+        </div>`;
       document.getElementById('modal-overlay').classList.add('open');
     };
 
