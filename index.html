@@ -77,30 +77,41 @@
   <div class="modal-overlay" id="modal-overlay"><div class="bg-zinc-900 border border-zinc-700 p-6 rounded-2xl max-w-md w-full shadow-2xl" id="modal-content"></div></div>
 
 <script>
-    const tricksData = [
-      { id: "stance", name: "Stance", category: "tier1", level: 1, description: "Finding your natural footing.", tips: "Which foot feels best forward?", prereqs: [], imageTag: "https://images.squarespace-cdn.com/content/v1/59483e5886e6c0c2018867a2/1498114406254-JSRK16B1B8G6X6S7Z6X6/Skateboard-Stance.jpg" },
-      { id: "push", name: "Pushing", category: "tier1", level: 1, description: "Generating momentum", tips: "Keep weight on the front foot.", prereqs: ["stance"], imageTag: "" },
-      { id: "stop", name: "Foot Brake", category: "tier1", level: 1, description: "Controlled stopping", tips: "Drag your back sole lightly.", prereqs: ["push"], imageTag: "" },
-      { id: "pumping", name: "Pumping", category: "tier1", level: 1, description: "Generating momentum in a transition.", tips: "Bend your knees at the bottom, extend on the way up.", prereqs: ["push"], imageTag: "" },
-      { id: "falling", name: "Falling", category: "tier1", level: 1, description: "Controlled Falling", tips: "Don't catch yourself with your hands; tuck and roll.", prereqs: [], imageTag: "" },
-      { id: "turning", name: "Turning", category: "tier1", level: 1, description: "Controlled turning", tips: "Lean into the toes or heels.", prereqs: ["push"], imageTag: "" },
-      { id: "running start", name: "Running Start", category: "tier1", level: 2, description: "Push the board then run and jump onto the bolts.", tips: "Look where you want to go.", prereqs: ["push"], imageTag: "" },
-      { id: "tictac", name: "Tic-Tacs", category: "tier1", level: 1, description: "Small pivot turns to build speed.", tips: "Swing your shoulders first.", prereqs: ["push"], imageTag: "" },
-      { id: "kickturn", name: "Kickturn", category: "tier1", level: 1, description: "Pivot turns on a ramp or flat.", tips: "Point your front shoulder where you want to go.", prereqs: ["push", "tictac"], imageTag: "" },
-      { id: "hippie jump", name: "Hippie Jump", category: "tier2", level: 2, description: "Jump into the air and land back on the bolts.", tips: "Start small and stay balanced over the center.", prereqs: ["push", "falling"], imageTag: "" },
-      { id: "ride switch", name: "Switch", category: "tier2", level: 2, description: "Riding in your non-natural stance.", tips: "It helps to pretend you're learning from scratch again!", prereqs: ["push"], imageTag: "" },
-      { id: "caveman", name: "Caveman", category: "tier3", level: 3, description: "Jumping onto the board from your hand.", tips: "Hold the nose, jump, and place the board under your feet.", prereqs: ["stance"], imageTag: "" },
-      { id: "spine transfer", name: "Spine Transfer", category: "tier3", level: 3, description: "Going over a spine ramp.", tips: "Maintain speed and lean forward as you clear the peak.", prereqs: ["push", "tictac"], imageTag: "" },
-      { id: "boneless", name: "Boneless", category: "tier3", level: 3, description: "Grab the board, plant one foot, and jump.", tips: "Plant your front foot and jump off it while pulling the board up.", prereqs: ["push", "tictac"], imageTag: "" },
-      { id: "fly out", name: "Fly Out", category: "tier3", level: 3, description: "Flying out of a ramp onto flat ground.", tips: "Keep the board leveled in the air.", prereqs: ["push", "tictac"], imageTag: "" },
-      { id: "roll in", name: "Roll in", category: "tier2", level: 2, description: "Rolling into a ramp from the deck.", tips: "Commit weight forward—don't lean back!", prereqs: ["push"], imageTag: "" },
-      { id: "drop-in", name: "Drop-In", category: "tier2", level: 2, description: "Entering a ramp from the coping.", tips: "Slam those front wheels down like you mean it!", prereqs: ["stop"], imageTag: "" },
-      { id: "rock to fakie", name: "Rock to Fakie", category: "tier3", level: 3, description: "Ramp stall and coming back backward.", tips: "Lift the front trucks slightly to clear the coping on the way back.", prereqs: ["drop-in"], imageTag: "" },
-      { id: "manual", name: "Manual", category: "tier2", level: 2, description: "Balancing on the two back wheels.", tips: "Find the 'sweet spot' and use your arms for balance.", prereqs: ["tictac"], imageTag: "" },
-      { id: "ollie", name: "Ollie", category: "tier2", level: 2, description: "The foundation of all flip tricks.", tips: "Pop the tail down hard and slide your front foot up.", prereqs: ["push", "tictac", "stop"], imageTag: "" },
-      { id: "shuvit", name: "Shuvit", category: "tier2", level: 2, description: "Spinning the board 180 degrees under your feet.", tips: "Scoop the tail back with your back foot.", prereqs: ["push"], imageTag: "" },
-      { id: "nollie shuvit", name: "Nollie Shuvit", category: "tier2", level: 2, description: "Spinning the board 180 degrees under your feet.", tips: "Scoop the nose back with your front foot.", prereqs: ["push"], imageTag: "" },
-      { id: "kickflip", name: "Kickflip", category: "tier5", level: 5, description: "Flipping the board along its axis.", tips: "Flick your front foot out and off the 'pocket' of the nose.", prereqs: ["ollie"], imageTag: "" }
+const tricksData = [
+      /* TIER 1: THE BASICS */
+      { id: "stance", name: "Stance", category: "tier1", level: 1, description: "Finding your natural footing.", tips: "Which foot feels best forward?", prereqs: [], imageTag: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Skateboard_Stances.jpg/640px-Skateboard_Stances.jpg" },
+      { id: "push", name: "Pushing", category: "tier1", level: 1, description: "Generating momentum.", tips: "Keep weight on the front foot.", prereqs: ["stance"] },
+      { id: "stop", name: "Foot Brake", category: "tier1", level: 1, description: "Controlled stopping.", tips: "Drag your back sole lightly.", prereqs: ["push"] },
+      { id: "falling", name: "Falling", category: "tier1", level: 1, description: "Controlled Falling.", tips: "Tuck and roll, don't use hands.", prereqs: [] },
+      { id: "turning", name: "Turning", category: "tier1", level: 1, description: "Basic leaning turns.", tips: "Lean into toes or heels.", prereqs: ["push"] },
+      { id: "tictac", name: "Tic-Tacs", category: "tier1", level: 1, description: "Small pivot turns.", tips: "Swing shoulders first.", prereqs: ["push"] },
+      { id: "pumping", name: "Pumping", category: "tier1", level: 1, description: "Speed in transitions.", tips: "Bend knees at the bottom.", prereqs: ["push"] },
+
+      /* TIER 2: ESSENTIAL SKILLS */
+      { id: "kickturn", name: "Kickturn", category: "tier2", level: 2, description: "Pivot on ramps.", tips: "Point your front shoulder.", prereqs: ["tictac"] },
+      { id: "running start", name: "Running Start", category: "tier2", level: 2, description: "Run and jump on.", tips: "Drop the board slightly ahead of you.", prereqs: ["push"] },
+      { id: "hippie jump", name: "Hippie Jump", category: "tier2", level: 2, description: "Jump and land on bolts.", tips: "Stay balanced over center.", prereqs: ["falling"] },
+      { id: "ride switch", name: "Switch", category: "tier2", level: 2, description: "Riding non-natural stance.", tips: "Pretend you are a beginner again!", prereqs: ["push"] },
+      { id: "roll in", name: "Roll in", category: "tier2", level: 2, description: "Rolling into a ramp.", tips: "Commit weight forward!", prereqs: ["pumping"] },
+      { id: "drop-in", name: "Drop-In", category: "tier2", level: 2, description: "Entering from coping.", tips: "Slam those front wheels down!", prereqs: ["stop"] },
+      { id: "manual", name: "Manual", category: "tier2", level: 2, description: "Balancing on 2 wheels.", tips: "Use arms for balance.", prereqs: ["tictac"] },
+      { id: "ollie", name: "Ollie", category: "tier2", level: 2, description: "Jump with the board.", tips: "Pop tail hard, slide foot up.", prereqs: ["tictac", "stop"] },
+
+      /* TIER 3: INTERMEDIATE */
+      { id: "shuvit", name: "Shuvit", category: "tier3", level: 3, description: "Spin board 180 degrees.", tips: "Scoop the tail back.", prereqs: ["push"] },
+      { id: "nollie shuvit", name: "Nollie Shuvit", category: "tier3", level: 3, description: "Front-foot scoop.", tips: "Pop the nose and scoop forward.", prereqs: ["shuvit"] },
+      { id: "caveman", name: "Caveman", category: "tier3", level: 3, description: "Jumping onto the board.", tips: "Hold nose, jump, and place.", prereqs: ["stance"] },
+      { id: "rock to fakie", name: "Rock to Fakie", category: "tier3", level: 3, description: "Ramp stall to backward.", tips: "Lift front trucks to clear coping.", prereqs: ["drop-in"] },
+      { id: "fly out", name: "Fly Out", category: "tier3", level: 3, description: "Exit ramp to flat ground.", tips: "Level the board in the air.", prereqs: ["pumping"] },
+      { id: "boneless", name: "Boneless", category: "tier3", level: 3, description: "Grab, plant foot, jump.", tips: "Plant front foot and jump.", prereqs: ["tictac"] },
+
+      /* TIER 4: ADVANCED TRANSITION */
+      { id: "spine transfer", name: "Spine Transfer", category: "tier4", level: 4, description: "Over a spine ramp.", tips: "Maintain speed, lean forward.", prereqs: ["fly out"] },
+      { id: "rock and roll", name: "Rock & Roll", category: "tier4", level: 4, description: "Stall and 180 out.", tips: "Turn your head before the board.", prereqs: ["rock to fakie"] },
+
+      /* TIER 5: PRO LEVEL */
+      { id: "kickflip", name: "Kickflip", category: "tier5", level: 5, description: "Flipping board on axis.", tips: "Flick off the 'pocket' of nose.", prereqs: ["ollie"] },
+      { id: "heelflip", name: "Heelflip", category: "tier5", level: 5, description: "Flipping with your heel.", tips: "Kick out in front of you.", prereqs: ["ollie"] }
     ];
 
     const CATEGORIES = { 
