@@ -158,33 +158,76 @@ const tricksData = [
       });
     }
 
-    function renderTree(student, searchTerm) {
+function renderTree(student, searchTerm) {
       const container = document.getElementById('tree-container');
-      const nodeW = 130, nodeH = 50, padX = 20, padY = 90;
-      const svgW = Math.max(container.clientWidth, 800);
+      // Adjusted sizes for better spacing
+      const nodeW = 110, nodeH = 40, padX = 25, padY = 70;
       const levels = {};
-      tricksData.forEach(t => { levels[t.level] = levels[t.level] || []; levels[t.level].push(t); });
+      
+      // Filter tricks based on search, but keep the structure
+      const filteredTricks = tricksData.filter(t => t.name.toLowerCase().includes(searchTerm));
+      
+      tricksData.forEach(t => { 
+        levels[t.level] = levels[t.level] || []; 
+        levels[t.level].push(t); 
+      });
+
       const sortedLevelKeys = Object.keys(levels).sort((a, b) => a - b);
       const pos = {};
+      let maxRowWidth = 0;
+
+      // Position every trick
       sortedLevelKeys.forEach((lvl, rowIdx) => {
         const row = levels[lvl];
-        const startX = (svgW - (row.length * (nodeW + padX))) / 2;
-        row.forEach((t, colIdx) => { pos[t.id] = { x: startX + colIdx * (nodeW + padX), y: rowIdx * (nodeH + padY) + 40 }; });
+        const rowWidth = row.length * (nodeW + padX);
+        if (rowWidth > maxRowWidth) maxRowWidth = rowWidth;
+        
+        // Center each row relative to the widest row
+        const rowStartX = (maxRowWidth - rowWidth) / 2;
+        
+        row.forEach((t, colIdx) => { 
+            pos[t.id] = { 
+                x: rowStartX + colIdx * (nodeW + padX), 
+                y: rowIdx * (nodeH + padY) + 50 
+            }; 
+        });
       });
+
+      const totalW = maxRowWidth;
+      // Added +150 extra pixels to ensure Tier 5 isn't cut off
+      const totalH = sortedLevelKeys.length * (nodeH + padY) + 150;
+
       let nodesMarkup = '', linesMarkup = '';
       tricksData.forEach(t => {
         const p = pos[t.id];
-        if (!p) return;
+        if(!p) return;
+        
         const unlocked = isUnlocked(t.id, student.progress);
         const ready = canUnlock(t, student.progress);
+        const matchesSearch = t.name.toLowerCase().includes(searchTerm);
+
         t.prereqs.forEach(pid => {
           const parent = pos[pid];
-          if (parent) linesMarkup += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${unlocked && isUnlocked(pid, student.progress) ? 'lit' : ''}" />`;
+          if (parent) {
+            linesMarkup += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${unlocked && isUnlocked(pid, student.progress) ? 'lit' : ''}" style="stroke: ${unlocked ? '#22c55e' : '#333'}; opacity: ${matchesSearch ? 1 : 0.2}" />`;
+          }
         });
-        nodesMarkup += `<g class="tree-node" onclick="openModal('${t.id}')"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" class="${unlocked ? 'node-unlocked' : (ready ? 'node-available' : 'node-locked')}" /><text x="${p.x + nodeW/2}" y="${p.y + 28}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text><text x="${p.x + nodeW/2}" y="${p.y - 8}" text-anchor="middle" fill="#f97316" font-size="8" font-weight="black">TIER ${t.level}</text></g>`;
+
+        nodesMarkup += `
+          <g class="tree-node" onclick="openModal('${t.id}')" style="opacity: ${matchesSearch ? 1 : 0.2}">
+            <rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" class="${unlocked ? 'node-unlocked' : (ready ? 'node-available' : 'node-locked')}" />
+            <text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 5}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text>
+          </g>`;
       });
-      const dynamicHeight = sortedLevelKeys.length * (nodeH + padY) + 100;
-      container.innerHTML = `<div class="tree-view"><svg width="${svgW}" height="${dynamicHeight}" class="tree-svg">${linesMarkup}${nodesMarkup}</svg></div>`;
+
+      // Updated the wrapper to allow better scrolling
+      container.innerHTML = `
+        <div class="tree-container-wrapper" style="min-height: 500px; -webkit-overflow-scrolling: touch;">
+          <svg viewBox="-50 0 ${totalW + 100} ${totalH}" class="tree-svg" preserveAspectRatio="xMidYMin meet">
+            ${linesMarkup}
+            ${nodesMarkup}
+          </svg>
+        </div>`;
     }
 
     // THE FIXED MODAL FUNCTION
