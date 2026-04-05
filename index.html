@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛹 Skills: Skill Tree</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #18181b;
+      --surface2: #27272a;
+      --orange: #f97316;
+      --green: #22c55e;
+      --border: #27272a;
+      --text-dim: #a1a1aa;
+    }
+    body { background-color: var(--bg); color: #ffffff; font-family: sans-serif; overflow-x: hidden; }
+    
+    .neon-orange { color: var(--orange); text-shadow: 0 0 10px rgba(249, 115, 22, 0.5); }
+    .neon-border { border-color: var(--orange); box-shadow: 0 0 10px rgba(249, 115, 22, 0.2); }
+
+    .trick-card { transition: all 0.2s ease; border: 2px solid var(--border); background-color: var(--surface); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; }
+    .trick-card.unlocked { border-color: var(--green); background: linear-gradient(135deg, var(--surface), #064e3b33); }
+    .trick-card.locked { opacity: 0.5; filter: grayscale(0.8); cursor: not-allowed; }
+    .trick-card.available { border-color: var(--orange); border-style: dashed; }
+
+    /* SVG Tree Styling */
+    .tree-view { overflow: auto; padding: 20px; background: #000; border-radius: 12px; border: 1px solid var(--border); }
+    .tree-svg line { stroke: #333; stroke-width: 2; transition: all 0.3s; }
+    .tree-svg line.lit { stroke: var(--green); stroke-width: 3; }
+    .tree-node rect { rx: 8; ry: 8; transition: all 0.2s; cursor: pointer; }
+    .node-locked { fill: #111; stroke: #333; }
+    .node-unlocked { fill: #064e3b; stroke: var(--green); }
+    .node-available { fill: #111; stroke: var(--orange); stroke-dasharray: 4; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 1rem; }
+    .modal-overlay.open { display: flex; }
+    .menu-panel { display: none; position: absolute; right: 0; top: 110%; width: 180px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; z-index: 50; }
+    .menu-panel.active { display: block; }
+  </style>
+</head>
+<body class="min-h-screen pb-12">
+  <div class="max-w-5xl mx-auto p-4">
+    
+    <header class="flex justify-between items-center mb-6 bg-zinc-900 p-4 rounded-xl border border-zinc-800 relative">
+      <div>
+        <h1 class="text-xl font-black italic tracking-tighter uppercase leading-none">
+          SKILL<span class="neon-orange">TREE</span>
+        </h1>
+        <p class="text-orange-500 text-[10px] font-bold uppercase tracking-[0.2em]">Progression Tracker</p>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <select id="studentSelect" onchange="switchStudent()" class="bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-xs outline-none focus:ring-1 ring-orange-500"></select>
+        <button onclick="addNewStudent()" class="bg-white text-black px-3 py-1 rounded-md text-[10px] font-black uppercase hover:bg-orange-500 hover:text-white transition-colors">➕ Add Skater</button>
+        
+        <div class="relative">
+          <button onclick="toggleMenu()" class="bg-zinc-800 text-zinc-400 px-3 py-1 rounded-md text-[10px] font-bold border border-zinc-700 hover:text-white">SETTINGS ⚙️</button>
+          <div id="dataMenu" class="menu-panel p-2 shadow-2xl">
+            <button onclick="exportJSON()" class="w-full text-left text-[11px] py-2 px-2 border-b border-zinc-700 hover:text-orange-500">📤 Export Progress</button>
+            <button onclick="importJSON()" class="w-full text-left text-[11px] py-2 px-2 border-b border-zinc-700 hover:text-orange-500">📥 Import Progress</button>
+            <button onclick="deleteCurrentStudent()" class="w-full text-left text-[11px] py-2 px-2 text-red-500 hover:bg-red-900/20">🗑️ Delete Skater</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div class="flex gap-6 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
+        <div class="stat">
+          <div class="text-zinc-500 text-[10px] font-bold uppercase">Mastered</div>
+          <div id="statsProgress" class="text-2xl font-black neon-orange">0/0</div>
+        </div>
+        <div class="stat">
+          <div class="text-zinc-500 text-[10px] font-bold uppercase">Ready to Learn</div>
+          <div id="statsAvail" class="text-2xl font-black text-white">0</div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <div class="flex gap-2">
+          <button id="btnGrid" onclick="setView('grid')" class="flex-1 py-2 rounded-md text-xs font-bold bg-orange-600">📋 GRID VIEW</button>
+          <button id="btnTree" onclick="setView('tree')" class="flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800">🌳 SKILL TREE</button>
+        </div>
+        <input type="text" id="search" placeholder="Search tricks..." oninput="render()" 
+               class="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2 text-sm outline-none focus:border-orange-500 transition-all">
+      </div>
+    </div>
+
+    <div id="tree-container"></div>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="bg-zinc-900 border border-zinc-700 p-6 rounded-2xl max-w-md w-full shadow-2xl" id="modal-content"></div>
+  </div>
+
+  <script>
+    const tricksData = [
+      { id: "push", name: "Pushing", category: "basics", level: 1, difficulty: 1, description: "Generating momentum", tips: "Keep weight on the front foot.", prereqs: [] },
+      { id: "stop", name: "Foot Brake", category: "basics", level: 1, difficulty: 1, description: "Controlled stopping", tips: "Drag your back sole lightly.", prereqs: ["push"] },
+      { id: "tictac", name: "Tic-Tacs", category: "basics", level: 2, difficulty: 2, description: "Pivot turns", tips: "Swing your shoulders first.", prereqs: ["push"] },
+      { id: "dropin", name: "Drop-In", category: "transition", level: 2, difficulty: 4, description: "Entering the ramp", tips: "Slam those front wheels down hard!", prereqs: [] },
+      { id: "manual", name: "Manual", category: "fundamentals", level: 2, difficulty: 3, description: "Balance on back wheels", tips: "Find the 'sweet spot' in your trucks.", prereqs: ["tictac"] },
+      { id: "ollie", name: "Ollie", category: "fundamentals", level: 3, difficulty: 5, description: "Jumping with the board", tips: "Pop down, slide up.", prereqs: ["tictac", "stop"] },
+      { id: "shuvit", name: "Pop Shuv-it", category: "flips", level: 4, difficulty: 4, description: "180 board spin", tips: "Scoop the tail straight back.", prereqs: ["ollie"] },
+      { id: "kickflip", name: "Kickflip", category: "flips", level: 5, difficulty: 7, description: "The classic flip", tips: "Flick out and up towards the nose.", prereqs: ["ollie"] }
+    ];
+
+    const CATEGORIES = {
+      basics: { name: 'Basics', icon: '🛹' },
+      fundamentals: { name: 'Fundamentals', icon: '⭐' },
+      flips: { name: 'Flips', icon: '🔄' },
+      transition: { name: 'Transition', icon: '🏄' }
+    };
+
+    let allStudents = JSON.parse(localStorage.getItem('skate_v3')) || [{ id: "s1", name: "New Skater", progress: {} }];
+    let currentId = localStorage.getItem('skate_id_v3') || allStudents[0].id;
+    let viewMode = 'grid';
+
+    function getStudent() { return allStudents.find(s => s.id === currentId) || allStudents[0]; }
+    function save() { localStorage.setItem('skate_v3', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v3', currentId); }
+
+    const isUnlocked = (id, progress) => !!progress[id];
+    const canUnlock = (trick, progress) => trick.prereqs.every(p => isUnlocked(p, progress));
+    const getPrereqNames = (ids) => ids.map(id => tricksData.find(t => t.id === id)?.name).join(", ");
+
+    function render() {
+      const student = getStudent();
+      const searchTerm = document.getElementById('search').value.toLowerCase();
+      const container = document.getElementById('tree-container');
+      container.innerHTML = '';
+
+      const mastered = Object.keys(student.progress).length;
+      const available = tricksData.filter(t => !isUnlocked(t.id, student.progress) && canUnlock(t, student.progress)).length;
+      document.getElementById('statsProgress').textContent = `${mastered}/${tricksData.length}`;
+      document.getElementById('statsAvail').textContent = available;
+
+      if (viewMode === 'grid') renderGrid(student, searchTerm);
+      else renderTree(student, searchTerm);
+    }
+
+    function renderGrid(student, searchTerm) {
+      const container = document.getElementById('tree-container');
+      Object.keys(CATEGORIES).forEach(catKey => {
+        const catTricks = tricksData.filter(t => t.category === catKey && t.name.toLowerCase().includes(searchTerm));
+        if (catTricks.length === 0) return;
+
+        const section = document.createElement('div');
+        section.className = "mb-8";
+        section.innerHTML = `
+          <div class="flex items-center gap-2 mb-4">
+            <span class="text-xl">${CATEGORIES[catKey].icon}</span>
+            <h2 class="font-black italic uppercase text-sm tracking-widest">${CATEGORIES[catKey].name}</h2>
+            <div class="h-px flex-1 bg-zinc-800"></div>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            ${catTricks.map(t => {
+              const unlocked = isUnlocked(t.id, student.progress);
+              const ready = canUnlock(t, student.progress);
+              const statusClass = unlocked ? 'unlocked' : (ready ? 'available' : 'locked');
+              const preReqInfo = (!unlocked && t.prereqs.length > 0) ? `<div class="mt-2 text-[8px] font-bold text-zinc-500 uppercase leading-tight">Needs: ${getPrereqNames(t.prereqs)}</div>` : '';
+              
+              return `
+                <div onclick="openModal('${t.id}')" class="trick-card p-3 rounded-lg cursor-pointer ${statusClass}">
+                  <div>
+                    <div class="flex justify-between items-start mb-1">
+                      <span class="text-[10px] font-bold text-zinc-500 uppercase">Lvl ${t.level}</span>
+                      ${unlocked ? '<span class="text-green-500 text-xs">✓</span>' : (ready ? '' : '🔒')}
+                    </div>
+                    <h3 class="font-bold text-xs truncate uppercase">${t.name}</h3>
+                  </div>
+                  ${preReqInfo}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+        container.appendChild(section);
+      });
+    }
+
+    function renderTree(student, searchTerm) {
+      const container = document.getElementById('tree-container');
+      const nodeW = 140, nodeH = 50, padX = 30, padY = 60;
+      const svgW = Math.max(container.clientWidth, 800);
+      let nodesMarkup = '';
+      let linesMarkup = '';
+      const levels = {};
+      tricksData.forEach(t => { levels[t.level] = levels[t.level] || []; levels[t.level].push(t); });
+      const pos = {};
+      Object.keys(levels).forEach((lvl, rowIdx) => {
+        const row = levels[lvl];
+        const rowWidth = row.length * nodeW + (row.length - 1) * padX;
+        const startX = (svgW - rowWidth) / 2;
+        row.forEach((t, colIdx) => { pos[t.id] = { x: startX + colIdx * (nodeW + padX), y: rowIdx * (nodeH + padY) + 20 }; });
+      });
+      tricksData.forEach(t => {
+        const p = pos[t.id];
+        const unlocked = isUnlocked(t.id, student.progress);
+        const ready = canUnlock(t, student.progress);
+        const rectClass = unlocked ? 'node-unlocked' : (ready ? 'node-available' : 'node-locked');
+        t.prereqs.forEach(pid => {
+          const parent = pos[pid];
+          const lineLit = unlocked && isUnlocked(pid, student.progress) ? 'lit' : '';
+          linesMarkup += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${lineLit}" />`;
+        });
+        nodesMarkup += `
+          <g class="tree-node" onclick="openModal('${t.id}')">
+            <rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" class="${rectClass}" />
+            <text x="${p.x + nodeW/2}" y="${p.y + 28}" text-anchor="middle" fill="white" font-size="10" font-weight="bold" class="uppercase">${t.name}</text>
+          </g>
+        `;
+      });
+      container.innerHTML = `<div class="tree-view"><svg width="${svgW}" height="${500}" class="tree-svg">${linesMarkup}${nodesMarkup}</svg></div>`;
+    }
+
+    window.openModal = (id) => {
+      const t = tricksData.find(x => x.id === id);
+      const student = getStudent();
+      const unlocked = isUnlocked(id, student.progress);
+      const ready = canUnlock(t, student.progress);
+      const reqText = t.prereqs.length > 0 ? `<div class="text-[10px] font-black uppercase text-zinc-500 mb-2">Prerequisites: ${getPrereqNames(t.prereqs)}</div>` : '';
+
+      document.getElementById('modal-content').innerHTML = `
+        <h2 class="text-xl font-black italic neon-orange mb-1 uppercase">${t.name}</h2>
+        ${reqText}
+        <p class="text-zinc-400 text-sm mb-4">${t.description}</p>
+        <div class="bg-black/40 p-4 rounded-xl border border-zinc-800 mb-6">
+          <strong class="text-orange-500 text-[10px] uppercase block mb-1">Coach Tips:</strong>
+          <p class="text-xs italic">"${t.tips}"</p>
+        </div>
+        <div class="flex gap-2">
+          ${unlocked ? 
+            `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-zinc-800 text-white rounded-lg font-bold text-xs">UNLEARN</button>` : 
+            (ready ? 
+              `<button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-orange-600 text-white rounded-lg font-bold text-xs">MARK AS LEARNED</button>` : 
+              `<button class="flex-1 py-3 bg-zinc-800 text-zinc-600 rounded-lg font-bold text-xs cursor-not-allowed uppercase">Locked</button>`)
+          }
+          <button onclick="closeModal()" class="px-4 py-3 bg-zinc-700 text-white rounded-lg font-bold text-xs">CLOSE</button>
+        </div>
+      `;
+      document.getElementById('modal-overlay').classList.add('open');
+    };
+
+    window.toggleTrick = (id) => {
+      const student = getStudent();
+      if (student.progress[id]) {
+        delete student.progress[id];
+        tricksData.filter(t => t.prereqs.includes(id)).forEach(dep => { if(student.progress[dep.id]) toggleTrick(dep.id); });
+      } else { student.progress[id] = true; }
+      save(); render(); closeModal();
+    };
+
+    window.closeModal = () => document.getElementById('modal-overlay').classList.remove('open');
+    window.toggleMenu = () => document.getElementById('dataMenu').classList.toggle('active');
+    window.setView = (v) => { 
+      viewMode = v; 
+      document.getElementById('btnGrid').className = v === 'grid' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800';
+      document.getElementById('btnTree').className = v === 'tree' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800';
+      render(); 
+    };
+
+    window.addNewStudent = () => {
+      const n = prompt("Skater Name:");
+      if (n) {
+        const newS = { id: "s" + Date.now(), name: n, progress: {} };
+        allStudents.push(newS);
+        currentId = newS.id;
+        save(); init();
+      }
+    };
+
+    window.switchStudent = () => { currentId = document.getElementById('studentSelect').value; save(); render(); };
+    window.deleteCurrentStudent = () => {
+      if (allStudents.length <= 1) return alert("Cannot delete the only skater.");
+      if (confirm("Delete this profile?")) {
+        allStudents = allStudents.filter(s => s.id !== currentId);
+        currentId = allStudents[0].id;
+        save(); init();
+      }
+    };
+
+    window.exportJSON = () => {
+      const blob = new Blob([JSON.stringify(allStudents)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'skate-progress.json';
+      a.click();
+    };
+
+    window.importJSON = () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.onchange = e => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          allStudents = JSON.parse(ev.target.result);
+          currentId = allStudents[0].id;
+          save(); init();
+        };
+        reader.readAsText(e.target.files[0]);
+      };
+      input.click();
+    };
+
+    function init() {
+      const sel = document.getElementById('studentSelect');
+      sel.innerHTML = allStudents.map(s => `<option value="${s.id}" ${s.id === currentId ? 'selected' : ''}>${s.name.toUpperCase()}</option>`).join('');
+      render();
+    }
+
+    init();
+  </script>
+</body>
+</html>
