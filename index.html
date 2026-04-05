@@ -54,6 +54,8 @@
       
       <div class="flex items-center gap-2">
         <select id="studentSelect" onchange="switchStudent()" class="bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-xs outline-none focus:ring-1 ring-orange-500"></select>
+        <button id="btnRegular" onclick="setStance('regular')" class="px-3 py-1 rounded-md text-[10px] font-black uppercase bg-blue-600 text-white">🟦 REGULAR</button>
+        <button id="btnGoofy" onclick="setStance('goofy')" class="px-3 py-1 rounded-md text-[10px] font-black uppercase bg-zinc-800">🟪 GOOFY</button>
         <button onclick="addNewStudent()" class="bg-white text-black px-3 py-1 rounded-md text-[10px] font-black uppercase hover:bg-orange-500 hover:text-white transition-colors">➕ Add Skater</button>
         
         <div class="relative">
@@ -117,7 +119,7 @@
       transition: { name: 'Transition', icon: '🏄' }
     };
 
-    let allStudents = JSON.parse(localStorage.getItem('skate_v3')) || [{ id: "s1", name: "New Skater", progress: {} }];
+    let allStudents = JSON.parse(localStorage.getItem('skate_v3')) || [{ id: "s1", name: "New Skater", progress: {}, stance: "regular" }];
     let currentId = localStorage.getItem('skate_id_v3') || allStudents[0].id;
     let viewMode = 'grid';
 
@@ -257,24 +259,24 @@
 
     window.closeModal = () => document.getElementById('modal-overlay').classList.remove('open');
     window.toggleMenu = () => document.getElementById('dataMenu').classList.toggle('active');
-window.setView = (v) => { 
-  viewMode = v; 
-  document.getElementById('btnGrid').className = v === 'grid' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800';
-  document.getElementById('btnTree').className = v === 'tree' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800';
-  render(); 
-};
+    window.setView = (v) => { 
+      viewMode = v; 
+      document.getElementById('btnGrid').className = v === 'grid' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800';
+      document.getElementById('btnTree').className = v === 'tree' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800';
+      render(); 
+    };
 
     window.addNewStudent = () => {
       const n = prompt("Skater Name:");
       if (n) {
-        const newS = { id: "s" + Date.now(), name: n, progress: {} };
+        const newS = { id: "s" + Date.now(), name: n, progress: {}, stance: "regular" };
         allStudents.push(newS);
         currentId = newS.id;
         save(); init();
       }
     };
 
-    window.switchStudent = () => { currentId = document.getElementById('studentSelect').value; save(); render(); };
+    window.switchStudent = () => { currentId = document.getElementById('studentSelect').value; save(); render(); updateStanceButtons(); };
     window.deleteCurrentStudent = () => {
       if (allStudents.length <= 1) return alert("Cannot delete the only skater.");
       if (confirm("Delete this profile?")) {
@@ -307,10 +309,25 @@ window.setView = (v) => {
       input.click();
     };
 
+    window.setStance = (s) => {
+      const student = getStudent();
+      student.stance = s;
+      save();
+      updateStanceButtons();
+    };
+
+    function updateStanceButtons() {
+      const student = getStudent();
+      const isRegular = student.stance === 'regular';
+      document.getElementById('btnRegular').className = isRegular ? 'px-3 py-1 rounded-md text-[10px] font-black uppercase bg-blue-600 text-white' : 'px-3 py-1 rounded-md text-[10px] font-black uppercase bg-zinc-800';
+      document.getElementById('btnGoofy').className = !isRegular ? 'px-3 py-1 rounded-md text-[10px] font-black uppercase bg-purple-600 text-white' : 'px-3 py-1 rounded-md text-[10px] font-black uppercase bg-zinc-800';
+    }
+
     function init() {
       const sel = document.getElementById('studentSelect');
       sel.innerHTML = allStudents.map(s => `<option value="${s.id}" ${s.id === currentId ? 'selected' : ''}>${s.name.toUpperCase()}</option>`).join('');
       render();
+      updateStanceButtons();
     }
 
     init();
