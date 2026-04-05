@@ -3,61 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🛹 Classes: Skill Tree</title>
+  <title>🛹 Demented Down Under: Academy</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root { --bg: #09090b; --surface: #18181b; --orange: #f97316; --green: #22c55e; --border: #27272a; }
-    body { background-color: var(--bg); color: #ffffff; font-family: sans-serif; overflow-x: hidden; }
+    body { background-color: var(--bg); color: #ffffff; font-family: sans-serif; overflow-x: hidden; margin: 0; }
     .neon-orange { color: var(--orange); text-shadow: 0 0 10px rgba(249, 115, 22, 0.5); }
+    .tier-wrapper { margin-bottom: 2.5rem; border-left: 4px solid var(--border); padding-left: 1rem; }
+    .tier-1 { border-color: #94a3b8; } 
+    .tier-2 { border-color: #fbbf24; } 
+    .tier-3 { border-color: #ef4444; } 
+    .tier-4 { border-color: #3b82f6; } 
+    .tier-5 { border-color: #a855f7; }
     .trick-card { transition: all 0.2s ease; border: 2px solid var(--border); background-color: var(--surface); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; border-radius: 12px; }
     .trick-card.unlocked { border-color: var(--green); background: linear-gradient(135deg, var(--surface), #064e3b33); }
     .trick-card.locked { opacity: 0.5; filter: grayscale(0.8); cursor: not-allowed; }
     .trick-card.available { border-color: var(--orange); border-style: dashed; }
-    
-    /* MODIFIED: Added touch-action and cursor for the pan/zoom logic */
-    .tree-container-wrapper { 
-      width: 100%; 
-      height: 70vh; 
-      background: #000; 
-      border-radius: 12px; 
-      border: 1px solid var(--border); 
-      position: relative; 
-      overflow: hidden; 
-      touch-action: none; 
-      cursor: grab; 
-    }
-    .tree-container-wrapper:active { cursor: grabbing; }
-
+    .tree-container-wrapper { width: 100%; height: 60vh; background: #000; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: hidden; touch-action: none; cursor: grab; }
     .tree-svg { width: 100%; height: 100%; display: block; }
     .tree-svg line { stroke: #333; stroke-width: 2; transition: stroke 0.5s; }
     .tree-svg line.lit { stroke: var(--green); stroke-width: 3; }
-    .tree-node rect { rx: 8; ry: 8; cursor: pointer; transition: transform 0.2s; }
-    .node-locked { fill: #111; stroke: #333; }
-    .node-unlocked { fill: #064e3b; stroke: var(--green); }
-    .node-available { fill: #111; stroke: var(--orange); stroke-dasharray: 4; }
-
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; padding: 1rem; }
     .modal-overlay.open { display: flex; }
     .menu-panel { display: none; position: absolute; right: 0; top: 110%; width: 180px; background: #27272a; border: 1px solid var(--border); border-radius: 8px; z-index: 50; }
     .menu-panel.active { display: block; }
   </style>
 </head>
-<body class="min-h-screen pb-12">
+<body class="pb-12">
   <div class="max-w-5xl mx-auto p-4">
     <header class="flex flex-col md:flex-row justify-between items-center mb-6 bg-zinc-900 p-4 rounded-xl border border-zinc-800 gap-4">
       <div>
-        <h1 class="text-xl font-black italic tracking-tighter uppercase leading-none">SKILL<span class="neon-orange">TREE</span></h1>
-        <p class="text-orange-500 text-[10px] font-bold uppercase tracking-[0.2em]">Classes</p>
+        <h1 class="text-xl font-black italic tracking-tighter uppercase leading-none">DEMENTED<span class="neon-orange">DOWN UNDER</span></h1>
+        <p class="text-orange-500 text-[10px] font-bold uppercase tracking-[0.2em]">Tiered Academy</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <select id="studentSelect" onchange="switchStudent()" class="bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-xs outline-none"></select>
+        <select id="studentSelect" onchange="switchStudent()" class="bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-xs outline-none font-bold uppercase"></select>
         <div class="flex bg-zinc-800 rounded-md p-1 border border-zinc-700">
-            <button id="btnRegular" onclick="setStance('regular')" class="px-3 py-1 rounded text-[10px] font-black uppercase">REGULAR</button>
+            <button id="btnRegular" onclick="setStance('regular')" class="px-3 py-1 rounded text-[10px] font-black uppercase">REG</button>
             <button id="btnGoofy" onclick="setStance('goofy')" class="px-3 py-1 rounded text-[10px] font-black uppercase">GOOFY</button>
         </div>
-        <button onclick="addNewStudent()" class="bg-white text-black px-3 py-1 rounded-md text-[10px] font-black uppercase hover:bg-orange-500 hover:text-white">➕ Add Skater</button>
+        <button onclick="addNewStudent()" class="bg-white text-black px-3 py-1 rounded-md text-[10px] font-black uppercase">➕ ADD</button>
         <div class="relative">
-          <button onclick="toggleMenu()" class="bg-zinc-800 text-zinc-400 px-3 py-1 rounded-md text-[10px] font-bold border border-zinc-700">SETTINGS ⚙️</button>
+          <button onclick="toggleMenu()" class="bg-zinc-800 text-zinc-400 px-3 py-1 rounded-md text-[10px] font-bold border border-zinc-700">⚙️</button>
           <div id="dataMenu" class="menu-panel p-2 shadow-2xl">
             <button onclick="exportJSON()" class="w-full text-left text-[11px] py-2 px-2 border-b border-zinc-700">📤 Export</button>
             <button onclick="importJSON()" class="w-full text-left text-[11px] py-2 px-2 border-b border-zinc-700">📥 Import</button>
@@ -67,19 +54,22 @@
       </div>
     </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <div class="flex gap-6 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-        <div class="stat"><div class="text-zinc-500 text-[10px] font-bold uppercase">Mastered</div><div id="statsProgress" class="text-2xl font-black neon-orange">0/0</div></div>
-        <div class="stat"><div class="text-zinc-500 text-[10px] font-bold uppercase">Ready</div><div id="statsAvail" class="text-2xl font-black text-white">0</div></div>
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
+        <div class="text-zinc-500 text-[10px] font-bold uppercase">Mastered</div>
+        <div id="statsProgress" class="text-2xl font-black neon-orange">0/0</div>
       </div>
-      <div class="flex flex-col gap-2">
-        <div class="flex gap-2">
-          <button id="btnGrid" onclick="setView('grid')" class="flex-1 py-2 rounded-md text-xs font-bold bg-orange-600">📋 GRID</button>
-          <button id="btnTree" onclick="setView('tree')" class="flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800">🌳 TREE</button>
+      <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
+        <div class="text-zinc-500 text-[10px] font-bold uppercase">View Mode</div>
+        <div class="flex gap-2 mt-1">
+          <button id="btnGrid" onclick="setView('grid')" class="flex-1 py-1 rounded bg-orange-600 text-[10px] font-bold">TIERS</button>
+          <button id="btnTree" onclick="setView('tree')" class="flex-1 py-1 rounded bg-zinc-800 text-[10px] font-bold">TREE</button>
         </div>
-        <input type="text" id="search" placeholder="Search tricks..." oninput="render()" class="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3 py-2 text-sm outline-none">
       </div>
     </div>
+
+    <input type="text" id="search" placeholder="Search tricks..." oninput="render()" class="w-full bg-zinc-900 border border-zinc-800 rounded-md px-3 py-3 text-sm mb-6 outline-none">
+
     <div id="tree-container"></div>
   </div>
 
@@ -88,49 +78,71 @@
   </div>
 
 <script>
-    const tricksData = [
-      { id: "stance", name: "Stance", category: "Basics", level: 1, description: "Finding your natural footing.", tips: "Which foot feels best forward?", prereqs: [] },
-      { id: "push", name: "Pushing", category: "Basics", level: 1, description: "Generating momentum.", tips: "Keep weight on the front foot.", prereqs: ["stance"] },
-      { id: "stop", name: "Foot Brake", category: "Basics", level: 1, description: "Controlled stopping.", tips: "Drag your back sole lightly.", prereqs: ["push"] },
-      { id: "pumping", name: "Pumping", category: "Basics", level: 1, description: "Speed in transitions.", tips: "Bend knees at bottom, extend on way up.", prereqs: ["push"] },
-      { id: "falling", name: "Falling", category: "Basics", level: 1, description: "Controlled Falling.", tips: "Tuck and roll, don't use hands.", prereqs: [] },
-      { id: "turning", name: "Turning", category: "Basics", level: 1, description: "Basic leaning turns.", tips: "Lean into toes or heels.", prereqs: ["push"] },
-      { id: "tictac", name: "Tic-Tacs", category: "Basics", level: 1, description: "Small pivot turns.", tips: "Swing shoulders first.", prereqs: ["push"] },
-      { id: "kickturn", name: "Kickturn", category: "Fundamentals", level: 2, description: "Pivot turns on ramp/flat.", tips: "Point your front shoulder.", prereqs: ["push", "tictac"] },
-      { id: "running start", name: "Running Start", category: "Fundamentals", level: 2, description: "Run and jump on.", tips: "Look where you want to go.", prereqs: ["push"] },
-      { id: "hippie jump", name: "Hippie Jump", category: "Fundamentals", level: 2, description: "Jump and land on bolts.", tips: "Stay balanced over center.", prereqs: ["push", "falling"] },
-      { id: "ride switch", name: "Switch", category: "Fundamentals", level: 2, description: "Non-natural stance.", tips: "Pretend you're starting over!", prereqs: ["push"] },
-      { id: "roll in", name: "Roll in", category: "Fundamentals", level: 2, description: "Rolling into a ramp.", tips: "Commit weight forward!", prereqs: ["push"] },
-      { id: "drop-in", name: "Drop-In", category: "Fundamentals", level: 2, description: "Entering from coping.", tips: "Slam those front wheels down!", prereqs: ["stop"] },
-      { id: "manual", name: "Manual", category: "Fundamentals", level: 2, description: "2-wheel balance.", tips: "Use arms for balance.", prereqs: ["tictac"] },
-      { id: "ollie", name: "Ollie", category: "Fundamentals", level: 2, description: "Foundation jump.", tips: "Pop tail hard, slide foot up.", prereqs: ["push", "tictac", "stop"] },
-      { id: "shuvit", name: "Shuvit", category: "Fundamentals", level: 2, description: "180 board spin.", tips: "Scoop the tail back.", prereqs: ["push"] },
-      { id: "nollie shuvit", name: "Nollie Shuvit", category: "Fundamentals", level: 2, description: "Front-foot scoop.", tips: "Pop the nose.", prereqs: ["shuvit"] },
-      { id: "caveman", name: "Caveman", category: "Intermediate", level: 3, description: "Jump onto board.", tips: "Hold nose, jump, and place.", prereqs: ["stance"] },
-      { id: "rock to fakie", name: "Rock to Fakie", category: "Intermediate", level: 3, description: "Stall and fakie out.", tips: "Lift front trucks over coping.", prereqs: ["drop-in"] },
-      { id: "fly out", name: "Fly Out", category: "Intermediate", level: 3, description: "Exit ramp to flat.", tips: "Level board in air.", prereqs: ["pumping"] },
-      { id: "boneless", name: "Boneless", category: "Intermediate", level: 3, description: "Grab, plant, jump.", tips: "Plant front foot and jump.", prereqs: ["tictac"] },
-      { id: "spine transfer", name: "Spine Transfer", category: "Intermediate", level: 3, description: "Over a spine peak.", tips: "Lean forward over peak.", prereqs: ["fly out"] },
-      { id: "kickflip", name: "Kickflip", category: "Advanced", level: 4, description: "Axis flip.", tips: "Flick off the pocket.", prereqs: ["ollie"] },
-      { id: "pro_placeholder", name: "Pro Skill", category: "Pro", level: 5, description: "High-level maneuver.", tips: "Stay focused.", prereqs: ["kickflip"] }
-    ];
-
-    const getLevelName = (lvl) => {
-        const names = { 1: "BASICS", 2: "FUNDAMENTALS", 3: "INTERMEDIATE", 4: "ADVANCED", 5: "PRO" };
-        return names[lvl] || `LEVEL ${lvl}`;
+    /* ==========================================
+       TRICK REPOSITORY (TIER-BASED)
+       Add new tricks into the correct Tier below.
+       ========================================== */
+    const tierConfig = {
+      1: {
+        name: "JOEY (Tier 1)",
+        tricks: [
+          { id: "stance", name: "Stance", description: "Finding your natural footing.", tips: "Which foot feels best forward?", prereqs: [] },
+          { id: "push", name: "Pushing", description: "Generating momentum.", tips: "Keep weight on the front foot.", prereqs: ["stance"] },
+          { id: "stop", name: "Foot Brake", description: "Controlled stopping.", tips: "Drag your back sole lightly.", prereqs: ["push"] },
+          { id: "pumping", name: "Pumping", description: "Speed in transitions.", tips: "Bend knees at bottom, extend on way up.", prereqs: ["push"] },
+          { id: "falling", name: "Falling", description: "Controlled Falling.", tips: "Tuck and roll, don't use hands.", prereqs: [] },
+          { id: "turning", name: "Turning", description: "Basic leaning turns.", tips: "Lean into toes or heels.", prereqs: ["push"] },
+          { id: "tictac", name: "Tic-Tacs", description: "Small pivot turns.", tips: "Swing shoulders first.", prereqs: ["push"] }
+        ]
+      },
+      2: {
+        name: "WOMBAT (Tier 2)",
+        tricks: [
+          { id: "kickturn", name: "Kickturn", description: "Pivot turns on ramp/flat.", tips: "Point your front shoulder.", prereqs: ["push", "tictac"] },
+          { id: "running start", name: "Running Start", description: "Run and jump on.", tips: "Look where you want to go.", prereqs: ["push"] },
+          { id: "hippie jump", name: "Hippie Jump", description: "Jump and land on bolts.", tips: "Stay balanced over center.", prereqs: ["push", "falling"] },
+          { id: "ride switch", name: "Switch", description: "Non-natural stance.", tips: "Pretend you're starting over!", prereqs: ["push"] },
+          { id: "roll in", name: "Roll in", description: "Rolling into a ramp.", tips: "Commit weight forward!", prereqs: ["push"] },
+          { id: "drop-in", name: "Drop-In", description: "Entering from coping.", tips: "Slam those front wheels down!", prereqs: ["stop"] },
+          { id: "manual", name: "Manual", description: "2-wheel balance.", tips: "Use arms for balance.", prereqs: ["tictac"] },
+          { id: "ollie", name: "Ollie", description: "Foundation jump.", tips: "Pop tail hard, slide foot up.", prereqs: ["push", "tictac", "stop"] },
+          { id: "shuvit", name: "Shuvit", description: "180 board spin.", tips: "Scoop the tail back.", prereqs: ["push"] },
+          { id: "nollie shuvit", name: "Nollie Shuvit", description: "Front-foot scoop.", tips: "Pop the nose.", prereqs: ["shuvit"] }
+        ]
+      },
+      3: {
+        name: "TAZZY (Tier 3)",
+        tricks: [
+          { id: "caveman", name: "Caveman", description: "Jump onto board.", tips: "Hold nose, jump, and place.", prereqs: ["stance"] },
+          { id: "rock to fakie", name: "Rock to Fakie", description: "Stall and fakie out.", tips: "Lift front trucks over coping.", prereqs: ["drop-in"] },
+          { id: "fly out", name: "Fly Out", description: "Exit ramp to flat.", tips: "Level board in air.", prereqs: ["pumping"] },
+          { id: "boneless", name: "Boneless", description: "Grab, plant, jump.", tips: "Plant front foot and jump.", prereqs: ["tictac"] },
+          { id: "spine transfer", name: "Spine Transfer", description: "Over a spine peak.", tips: "Lean forward over peak.", prereqs: ["fly out"] }
+        ]
+      },
+      4: {
+        name: "RIPPER (Tier 4)",
+        tricks: [
+          { id: "kickflip", name: "Kickflip", description: "Axis flip.", tips: "Flick off the pocket.", prereqs: ["ollie"] }
+        ]
+      },
+      5: {
+        name: "APEX (Tier 5)",
+        tricks: [
+          { id: "pro_placeholder", name: "Pro Skill", description: "High-level maneuver.", tips: "Stay focused.", prereqs: ["kickflip"] }
+        ]
+      }
     };
+
+    // Flatten data for the engine but keep levels linked
+    const tricksData = Object.keys(tierConfig).flatMap(lvl => 
+      tierConfig[lvl].tricks.map(t => ({ ...t, level: parseInt(lvl) }))
+    );
 
     let allStudents = JSON.parse(localStorage.getItem('skate_v3')) || [{ id: "s1", name: "New Skater", progress: {}, stance: "regular" }];
     let currentId = localStorage.getItem('skate_id_v3') || allStudents[0].id;
     let viewMode = 'grid';
-
-    // NEW GLOBAL STATE FOR ZOOM/PAN
-    let zoom = 1.0;
-    let offsetX = 0;
-    let offsetY = 0;
-    let isDragging = false;
-    let lastMousePos = { x: 0, y: 0 };
-    let initialPinchDist = null;
+    let zoom = 1.0, offsetX = 0, offsetY = 0, isDragging = false, lastMousePos = { x: 0, y: 0 }, initialPinchDist = null;
 
     function getStudent() { return allStudents.find(s => s.id === currentId) || allStudents[0]; }
     function save() { localStorage.setItem('skate_v3', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v3', currentId); }
@@ -144,22 +156,20 @@
       const container = document.getElementById('tree-container');
       container.innerHTML = '';
       document.getElementById('statsProgress').textContent = `${Object.keys(student.progress).length}/${tricksData.length}`;
-      document.getElementById('statsAvail').textContent = tricksData.filter(t => !isUnlocked(t.id, student.progress) && canUnlock(t, student.progress)).length;
       if (viewMode === 'grid') renderGrid(student, searchTerm); else renderTree(student, searchTerm);
     }
 
     function renderGrid(student, searchTerm) {
       const container = document.getElementById('tree-container');
-      const levels = [...new Set(tricksData.map(t => t.level))].sort((a,b) => a - b);
-      levels.forEach(lvl => {
-        const lvlTricks = tricksData.filter(t => t.level === lvl && t.name.toLowerCase().includes(searchTerm));
-        if (lvlTricks.length === 0) return;
+      Object.keys(tierConfig).forEach(lvl => {
+        const lvlTricks = tierConfig[lvl].tricks.filter(t => t.name.toLowerCase().includes(searchTerm));
+        if (lvlTricks.length === 0 && searchTerm !== "") return;
+
         const section = document.createElement('div');
-        section.className = "mb-8";
+        section.className = `tier-wrapper tier-${lvl}`;
         section.innerHTML = `
-          <div class="flex items-center gap-2 mb-4">
-            <h2 class="font-black italic uppercase text-xs tracking-widest text-zinc-500">${getLevelName(lvl)}</h2>
-            <div class="h-px flex-1 bg-zinc-800"></div>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-black italic uppercase text-sm tracking-widest text-white">${tierConfig[lvl].name}</h2>
           </div>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
             ${lvlTricks.map(t => {
@@ -169,7 +179,7 @@
                 <div onclick="openModal('${t.id}')" class="trick-card p-3 cursor-pointer ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}">
                   <div>
                     <div class="flex justify-between items-start mb-1">
-                      <span class="text-[9px] font-bold text-zinc-600 uppercase">LVL ${t.level}</span>
+                      <span class="text-[9px] font-bold text-zinc-600 uppercase">TIER ${lvl}</span>
                       ${unlocked ? '✅' : (ready ? '' : '🔒')}
                     </div>
                     <h3 class="font-bold text-xs uppercase">${t.name}</h3>
@@ -185,119 +195,49 @@
     function renderTree(student, searchTerm) {
       const container = document.getElementById('tree-container');
       const nodeW = 110, nodeH = 40, padX = 40, padY = 80;
-      const levels = {};
-      tricksData.forEach(t => { levels[t.level] = levels[t.level] || []; levels[t.level].push(t); });
-      const sortedLevelKeys = Object.keys(levels).sort((a, b) => a - b);
-      
       const pos = {};
       let maxRowWidth = 0;
-      sortedLevelKeys.forEach((lvl, rowIdx) => {
-        const row = levels[lvl];
-        const rowWidth = row.length * (nodeW + padX);
-        if (rowWidth > maxRowWidth) maxRowWidth = rowWidth;
-        const rowStartX = (maxRowWidth - rowWidth) / 2;
-        row.forEach((t, colIdx) => { pos[t.id] = { x: rowStartX + colIdx * (nodeW + padX), y: rowIdx * (nodeH + padY) + 60 }; });
+      const sortedKeys = Object.keys(tierConfig).sort((a,b)=>a-b);
+      sortedKeys.forEach((lvl, rowIdx) => {
+        const row = tierConfig[lvl].tricks;
+        const rowW = row.length * (nodeW + padX);
+        if (rowW > maxRowWidth) maxRowWidth = rowW;
+        const startX = (maxRowWidth - rowW) / 2;
+        row.forEach((t, colIdx) => { pos[t.id] = { x: startX + colIdx * (nodeW + padX), y: rowIdx * (nodeH + padY) + 60 }; });
       });
-
-      const totalW = maxRowWidth;
-      const totalH = sortedLevelKeys.length * (nodeH + padY) + 100;
-
-      let nodesMarkup = '', linesMarkup = '';
-      sortedLevelKeys.forEach((lvl, rowIdx) => {
-          const rowY = rowIdx * (nodeH + padY) + 60;
-          nodesMarkup += `<text x="0" y="${rowY - 15}" fill="#f97316" font-size="10" font-weight="black" class="uppercase italic tracking-widest">${getLevelName(lvl)}</text><line x1="0" y1="${rowY - 10}" x2="${totalW}" y2="${rowY - 10}" stroke="#27272a" stroke-dasharray="4" />`;
-      });
-
+      const totalW = maxRowWidth, totalH = sortedKeys.length * (nodeH + padY) + 100;
+      let nodes = '', lines = '';
       tricksData.forEach(t => {
         const p = pos[t.id];
         const unlocked = isUnlocked(t.id, student.progress);
-        const ready = canUnlock(t, student.progress);
-        const matchesSearch = t.name.toLowerCase().includes(searchTerm);
+        const matches = t.name.toLowerCase().includes(searchTerm);
         t.prereqs.forEach(pid => {
           const parent = pos[pid];
-          if (parent) linesMarkup += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${unlocked && isUnlocked(pid, student.progress) ? 'lit' : ''}" style="stroke: ${unlocked ? '#22c55e' : '#333'}; opacity: ${matchesSearch ? 1 : 0.2}" />`;
+          if (parent) lines += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${unlocked && isUnlocked(pid, student.progress) ? 'lit' : ''}" style="stroke: ${unlocked ? '#22c55e' : '#333'}; opacity: ${matches ? 1 : 0.2}" />`;
         });
-        nodesMarkup += `<g class="tree-node" onclick="openModal('${t.id}')" style="opacity: ${matchesSearch ? 1 : 0.2}"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" class="${unlocked ? 'node-unlocked' : (ready ? 'node-available' : 'node-locked')}" /><text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 5}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text></g>`;
+        nodes += `<g class="tree-node" onclick="openModal('${t.id}')" style="opacity: ${matches ? 1 : 0.2}"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" class="${unlocked ? 'node-unlocked' : (canUnlock(t, student.progress) ? 'node-available' : 'node-locked')}" /><text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 5}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text></g>`;
       });
-
-      // MODIFIED: Injecting Wrapper with Zoom Controls and Event Listeners
-      container.innerHTML = `
-        <div class="tree-container-wrapper" id="treeWrapper">
-          <div class="absolute top-4 left-4 z-10 flex flex-col gap-2">
-            <button onclick="handleZoomBtn(0.8)" class="bg-zinc-800 w-8 h-8 rounded border border-zinc-700 font-bold">+</button>
-            <button onclick="handleZoomBtn(1.2)" class="bg-zinc-800 w-8 h-8 rounded border border-zinc-700 font-bold">-</button>
-            <button onclick="resetZoom()" class="bg-zinc-800 px-2 py-1 rounded border border-zinc-700 text-[9px] font-black">RESET</button>
-          </div>
-          <svg id="treeSvg" viewBox="${offsetX} ${offsetY} ${totalW * zoom} ${totalH * zoom}" class="tree-svg">
-            ${linesMarkup}${nodesMarkup}
-          </svg>
-        </div>`;
-
-      initInteractionHandlers(document.getElementById('treeWrapper'), document.getElementById('treeSvg'), totalW, totalH);
+      container.innerHTML = `<div class="tree-container-wrapper" id="treeWrapper"><svg id="treeSvg" class="tree-svg">${lines}${nodes}</svg></div>`;
+      initInteractionHandlers(document.getElementById('treeWrapper'), document.getElementById('treeSvg'));
     }
 
-    // NEW INTERACTION SURGERY: Function to handle dragging and pinching
-    function initInteractionHandlers(wrapper, svg, totalW, totalH) {
-      const updateView = () => {
-        svg.setAttribute('viewBox', `${offsetX} ${offsetY} ${wrapper.clientWidth * zoom} ${wrapper.clientHeight * zoom}`);
-      };
-
-      const startDrag = (x, y) => { isDragging = true; lastMousePos = { x, y }; };
-      const moveDrag = (x, y) => {
-        if (!isDragging) return;
-        offsetX += (lastMousePos.x - x) * zoom;
-        offsetY += (lastMousePos.y - y) * zoom;
-        lastMousePos = { x, y };
-        updateView();
-      };
-
-      // Mouse Listeners
-      wrapper.onmousedown = (e) => startDrag(e.clientX, e.clientY);
-      window.onmousemove = (e) => moveDrag(e.clientX, e.clientY);
+    function initInteractionHandlers(wrapper, svg) {
+      const updateView = () => { svg.setAttribute('viewBox', `${offsetX} ${offsetY} ${wrapper.clientWidth * zoom} ${wrapper.clientHeight * zoom}`); };
+      wrapper.onmousedown = (e) => { isDragging = true; lastMousePos = { x: e.clientX, y: e.clientY }; };
+      window.onmousemove = (e) => { if (!isDragging) return; offsetX += (lastMousePos.x - e.clientX) * zoom; offsetY += (lastMousePos.y - e.clientY) * zoom; lastMousePos = { x: e.clientX, y: e.clientY }; updateView(); };
       window.onmouseup = () => isDragging = false;
-      wrapper.onwheel = (e) => {
-        e.preventDefault();
-        zoom *= (e.deltaY > 0 ? 1.1 : 0.9);
-        zoom = Math.min(Math.max(zoom, 0.2), 5);
-        updateView();
-      };
-
-      // Touch Listeners (Mobile)
-      wrapper.ontouchstart = (e) => {
-        if (e.touches.length === 1) {
-          startDrag(e.touches[0].clientX, e.touches[0].clientY);
-        } else if (e.touches.length === 2) {
-          initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-        }
-      };
-
-      wrapper.ontouchmove = (e) => {
-        if (e.touches.length === 1) {
-          moveDrag(e.touches[0].clientX, e.touches[0].clientY);
-        } else if (e.touches.length === 2 && initialPinchDist) {
-          const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-          zoom *= (initialPinchDist / dist);
-          zoom = Math.min(Math.max(zoom, 0.2), 5);
-          initialPinchDist = dist;
-          updateView();
-        }
-      };
-
+      wrapper.onwheel = (e) => { e.preventDefault(); zoom *= (e.deltaY > 0 ? 1.1 : 0.9); updateView(); };
+      wrapper.ontouchstart = (e) => { if (e.touches.length === 1) { isDragging = true; lastMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY }; } else if (e.touches.length === 2) { initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); } };
+      wrapper.ontouchmove = (e) => { if (e.touches.length === 1 && isDragging) { offsetX += (lastMousePos.x - e.touches[0].clientX) * zoom; offsetY += (lastMousePos.y - e.touches[0].clientY) * zoom; lastMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY }; updateView(); } else if (e.touches.length === 2 && initialPinchDist) { const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); zoom *= (initialPinchDist / dist); initialPinchDist = dist; updateView(); } };
       wrapper.ontouchend = () => { isDragging = false; initialPinchDist = null; };
-      
-      // Sync initial view
       updateView();
     }
-
-    window.handleZoomBtn = (factor) => { zoom *= factor; render(); };
-    window.resetZoom = () => { zoom = 1.0; offsetX = 0; offsetY = 0; render(); };
 
     window.openModal = (id) => {
       const t = tricksData.find(x => x.id === id);
       const student = getStudent();
       const unlocked = isUnlocked(id, student.progress);
       const ready = canUnlock(t, student.progress);
-
       document.getElementById('modal-content').innerHTML = `
         <h2 class="text-xl font-black italic neon-orange uppercase mb-1">${t.name}</h2>
         ${t.prereqs.length > 0 ? `<div class="text-[10px] font-black uppercase text-zinc-500 mb-2">Needs: ${getPrereqNames(t.prereqs)}</div>` : ''}
@@ -321,15 +261,15 @@
 
     window.closeModal = () => document.getElementById('modal-overlay').classList.remove('open');
     window.toggleMenu = () => document.getElementById('dataMenu').classList.toggle('active');
-    window.setView = (v) => { viewMode = v; document.getElementById('btnGrid').className = v === 'grid' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800'; document.getElementById('btnTree').className = v === 'tree' ? 'flex-1 py-2 rounded-md text-xs font-bold bg-orange-600' : 'flex-1 py-2 rounded-md text-xs font-bold bg-zinc-800'; render(); };
-    window.addNewStudent = () => { const n = prompt("Name:"); if (n) { const newS = { id: "s" + Date.now(), name: n, progress: {}, stance: "regular" }; allStudents.push(newS); currentId = newS.id; save(); init(); } };
+    window.setView = (v) => { viewMode = v; render(); };
+    window.addNewStudent = () => { const n = prompt("Name:"); if (n) { allStudents.push({ id: "s" + Date.now(), name: n, progress: {}, stance: "regular" }); save(); init(); } };
     window.switchStudent = () => { currentId = document.getElementById('studentSelect').value; save(); render(); updateStanceButtons(); };
     window.deleteCurrentStudent = () => { if (allStudents.length > 1 && confirm("Delete?")) { allStudents = allStudents.filter(s => s.id !== currentId); currentId = allStudents[0].id; save(); init(); } };
     window.exportJSON = () => { const blob = new Blob([JSON.stringify(allStudents)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'skate.json'; a.click(); };
     window.importJSON = () => { const input = document.createElement('input'); input.type = 'file'; input.onchange = e => { const reader = new FileReader(); reader.onload = ev => { allStudents = JSON.parse(ev.target.result); currentId = allStudents[0].id; save(); init(); }; reader.readAsText(e.target.files[0]); }; input.click(); };
-    window.setStance = (s) => { const student = getStudent(); student.stance = s; save(); updateStanceButtons(); };
-    function updateStanceButtons() { const s = getStudent(); document.getElementById('btnRegular').className = s.stance === 'regular' ? 'px-3 py-1 rounded text-[10px] font-black bg-blue-600' : 'px-3 py-1 rounded text-[10px] font-black bg-zinc-800 text-zinc-400'; document.getElementById('btnGoofy').className = s.stance === 'goofy' ? 'px-3 py-1 rounded text-[10px] font-black bg-purple-600' : 'px-3 py-1 rounded text-[10px] font-black bg-zinc-800 text-zinc-400'; }
-    function init() { const sel = document.getElementById('studentSelect'); sel.innerHTML = allStudents.map(s => `<option value="${s.id}" ${s.id === currentId ? 'selected' : ''}>${s.name.toUpperCase()}</option>`).join(''); render(); updateStanceButtons(); }
+    window.setStance = (s) => { getStudent().stance = s; save(); updateStanceButtons(); };
+    function updateStanceButtons() { const s = getStudent(); document.getElementById('btnRegular').className = s.stance === 'regular' ? 'px-3 py-1 rounded text-[10px] font-black bg-orange-600' : 'px-3 py-1 rounded text-[10px] font-black bg-zinc-800 text-zinc-400'; document.getElementById('btnGoofy').className = s.stance === 'goofy' ? 'px-3 py-1 rounded text-[10px] font-black bg-orange-600' : 'px-3 py-1 rounded text-[10px] font-black bg-zinc-800 text-zinc-400'; }
+    function init() { document.getElementById('studentSelect').innerHTML = allStudents.map(s => `<option value="${s.id}" ${s.id === currentId ? 'selected' : ''}>${s.name.toUpperCase()}</option>`).join(''); render(); updateStanceButtons(); }
     init();
 </script>
 </body>
