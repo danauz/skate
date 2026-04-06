@@ -3,33 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🛹 Classes</title>
+  <title>🛹 Academy Pro</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root { --bg: #09090b; --surface: #18181b; --orange: #f97316; --green: #22c55e; --border: #27272a; }
     body { background-color: var(--bg); color: #ffffff; font-family: sans-serif; overflow-x: hidden; margin: 0; }
     .neon-orange { color: var(--orange); text-shadow: 0 0 10px rgba(249, 115, 22, 0.5); }
-    .btn-active { background-color: var(--orange) !important; box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); border-color: #ffedd5 !important; color: white !important; }
+    .btn-active { background-color: var(--orange) !important; color: white !important; }
     
     .tier-wrapper { margin-bottom: 2.5rem; border-left: 4px solid var(--border); padding-left: 1rem; }
-    .trick-card { transition: all 0.2s ease; border: 2px solid var(--border); background-color: var(--surface); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; border-radius: 12px; }
+    .xp-bar-bg { width: 100%; height: 6px; background: #111; border-radius: 10px; margin: 8px 0 16px 0; overflow: hidden; border: 1px solid #27272a; }
+    .xp-bar-fill { height: 100%; background: var(--orange); transition: width 0.5s ease; box-shadow: 0 0 10px var(--orange); }
+
+    .trick-card { transition: all 0.2s ease; border: 2px solid var(--border); background-color: var(--surface); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; border-radius: 12px; position: relative; }
     .trick-card.unlocked { border-color: var(--green); background: linear-gradient(135deg, var(--surface), #064e3b33); }
-    .trick-card.locked { opacity: 0.4; filter: grayscale(1); }
+    .trick-card.locked { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
     .trick-card.available { border-color: var(--orange); border-style: dashed; }
     
+    .confidence-dots { display: flex; gap: 3px; margin-top: 5px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #333; }
+    .dot.active { background: var(--orange); box-shadow: 0 0 5px var(--orange); }
+
     .tree-container-wrapper { width: 100%; height: 60vh; background: #000; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: auto; }
     .tree-svg { display: block; background: radial-gradient(circle, #111 1px, transparent 1px); background-size: 30px 30px; }
     .tree-svg line { stroke: #333; stroke-width: 2; }
-    .tree-svg line.lit { stroke: var(--green); stroke-width: 3; filter: drop-shadow(0 0 5px #22c55e); }
+    .tree-svg line.lit { stroke: var(--green); stroke-width: 3; }
     
-    .sticker-slot { width: 50px; height: 50px; background: #111; border: 2px dashed #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; filter: grayscale(1); opacity: 0.3; }
-    .sticker-slot.earned { filter: grayscale(0); opacity: 1; border-style: solid; border-color: var(--orange); box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
+    .sticker-slot { width: 50px; height: 50px; background: #111; border: 2px dashed #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0.2; }
+    .sticker-slot.earned { opacity: 1; border-style: solid; border-color: var(--orange); }
     .timer-active { animation: pulse 2s infinite; background-color: #ef4444 !important; }
     
-    .day-btn { background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
-    .day-btn.active { background: var(--orange); border-color: #fff; color: #000; }
+    .day-btn { background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; cursor: pointer; }
+    .day-btn.active { background: var(--orange); color: #000; }
     
-    input[type="date"], input[type="time"] { background: #000; border: 1px solid #27272a; color: #f97316; font-size: 11px; padding: 4px; border-radius: 4px; outline: none; }
+    input, textarea { background: #000 !important; border: 1px solid #27272a !important; color: white !important; outline: none; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
   </style>
 </head>
@@ -38,12 +45,12 @@
     <header class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 mb-4">
       <div class="flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
-          <h1 class="text-xl font-black italic uppercase tracking-tighter leading-none">Classes</h1>
-          <div id="sessionTimer" class="text-[9px] font-bold text-zinc-500 mt-1 uppercase tracking-widest">Session: 00:00:00</div>
+          <h1 class="text-xl font-black italic uppercase tracking-tighter">Academy Coach</h1>
+          <div id="sessionTimer" class="text-[9px] font-bold text-zinc-500 mt-1 uppercase">Session: 00:00:00</div>
         </div>
         <div class="flex flex-wrap gap-2 justify-center">
           <button id="timerBtn" onclick="toggleTimer()" class="bg-zinc-800 text-[9px] font-bold uppercase px-3 py-1 rounded border border-zinc-700">Start Session</button>
-          <select id="studentSelect" onchange="switchStudent(this.value)" class="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs font-bold uppercase outline-none"></select>
+          <select id="studentSelect" onchange="switchStudent(this.value)" class="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs font-bold uppercase"></select>
           <button onclick="addStudent()" class="bg-zinc-800 px-2 rounded border border-zinc-700 text-xs">＋</button>
           <button onclick="deleteStudent()" class="bg-zinc-800 px-2 rounded border border-zinc-700 text-xs text-red-500">×</button>
         </div>
@@ -55,25 +62,19 @@
             <button onclick="document.getElementById('importFile').click()" class="text-[10px] font-bold uppercase bg-zinc-800 px-3 py-1 rounded border border-zinc-700">Import</button>
             <input type="file" id="importFile" class="hidden" onchange="importData(event)">
         </div>
-        <div class="text-[10px] font-bold text-zinc-500 uppercase">Progress: <span id="statsProgress" class="text-orange-500">0/0</span></div>
+        <div class="text-[10px] font-bold text-zinc-500 uppercase">Academy Rank: <span id="statsProgress" class="text-orange-500">0/0</span></div>
       </div>
     </header>
 
-    <div class="mb-6" id="notes-area">
-      <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3">
-        <textarea id="trainerNotes" oninput="saveNotes(this.value)" class="w-full bg-black/40 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-300 outline-none" rows="2" placeholder="Trainer notes..."></textarea>
-      </div>
-    </div>
-
     <div class="grid grid-cols-3 gap-2 mb-6">
-      <button id="btnGrid" onclick="setView('grid')" class="py-2 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-bold transition-all uppercase">Tiers</button>
-      <button id="btnTree" onclick="setView('tree')" class="py-2 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-bold transition-all uppercase">Tree</button>
-      <button id="btnSched" onclick="setView('schedule')" class="py-2 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-bold transition-all uppercase">Schedule</button>
+      <button id="btnGrid" onclick="setView('grid')" class="py-2 rounded bg-zinc-800 text-[10px] font-bold uppercase">Tiers</button>
+      <button id="btnTree" onclick="setView('tree')" class="py-2 rounded bg-zinc-800 text-[10px] font-bold uppercase">Tree</button>
+      <button id="btnSched" onclick="setView('schedule')" class="py-2 rounded bg-zinc-800 text-[10px] font-bold uppercase">Schedule</button>
     </div>
 
     <div id="main-container"></div>
 
-    <div class="mt-8 p-4 bg-zinc-900/30 rounded-2xl border border-zinc-800 flex justify-around" id="stickerContainer">
+    <div class="mt-8 p-4 bg-zinc-900/30 rounded-2xl border border-zinc-800 flex justify-around">
         <div id="badge-1" class="sticker-slot">🛹</div><div id="badge-2" class="sticker-slot">🔥</div>
         <div id="badge-3" class="sticker-slot">⚡</div><div id="badge-4" class="sticker-slot">💀</div>
         <div id="badge-5" class="sticker-slot">👑</div>
@@ -86,7 +87,7 @@
 
 <script>
     const tierConfig = {
-      1: { name: "Fundamentals (Tier 1)", tricks: [
+      1: { name: "Fundamentals", tricks: [
         { id: "stance", name: "Stance", description: "Finding your natural footing.", prereqs: [] },
         { id: "push", name: "Pushing", description: "Generating momentum.", prereqs: ["stance"] },
         { id: "stop", name: "Foot Brake", description: "Controlled stopping.", prereqs: ["push"] },
@@ -95,7 +96,7 @@
         { id: "turning", name: "Turning", description: "Basic leaning turns.", prereqs: ["push"] },
         { id: "tictac", name: "Tic-Tacs", description: "Small pivot turns.", prereqs: ["push"] }
       ]},
-      2: { name: "Basic (Tier 2)", tricks: [
+      2: { name: "Basic", tricks: [
         { id: "kickturn", name: "Kickturn", description: "Pivot turns on ramp/flat.", prereqs: ["push", "tictac"] },
         { id: "running_start", name: "Running Start", description: "Run and jump on board.", prereqs: ["push"] },
         { id: "hippie_jump", name: "Hippie Jump", description: "Jump and land on bolts.", prereqs: ["push", "falling"] },
@@ -107,7 +108,7 @@
         { id: "shuvit", name: "Shuvit", description: "180 board spin.", prereqs: ["push"] },
         { id: "fakie_ride", name: "Fakie Riding", description: "Riding backwards.", prereqs: ["push"] }
       ]},
-      3: { name: "Intermediate (Tier 3)", tricks: [
+      3: { name: "Intermediate", tricks: [
         { id: "pop_shuvit", name: "Pop Shuvit", description: "180 board spin with a pop.", prereqs: ["shuvit"] },
         { id: "rock_to_fakie", name: "Rock to Fakie", description: "Stall and fakie out.", prereqs: ["drop_in"] },
         { id: "caveman", name: "Caveman", description: "Jump onto board.", prereqs: ["stance"] },
@@ -116,39 +117,39 @@
         { id: "fifty_fifty", name: "50-50 Grind", description: "Grinding both trucks.", prereqs: ["ollie"] },
         { id: "fakie_ollie", name: "Fakie Ollie", description: "Ollie while riding backwards.", prereqs: ["fakie_ride", "ollie"] }
       ]},
-      4: { name: "Advanced (Tier 4)", tricks: [
+      4: { name: "Advanced", tricks: [
         { id: "kickflip", name: "Kickflip", description: "The classic board flip.", prereqs: ["ollie"] },
         { id: "three_shuv", name: "360 Shuvit", description: "Full rotation spin.", prereqs: ["pop_shuvit"] },
         { id: "spine_transfer", name: "Spine Transfer", description: "Over a spine peak.", prereqs: ["fly_out"] },
         { id: "boardslide", name: "Boardslide", description: "Sliding on the middle of the deck.", prereqs: ["fifty_fifty"] },
         { id: "half_cab", name: "Half-Cab", description: "Fakie 180 Ollie.", prereqs: ["fakie_ollie"] }
       ]},
-      5: { name: "Pro (Tier 5)", tricks: [
+      5: { name: "Pro", tricks: [
         { id: "tre_flip", name: "360 Kickflip", description: "360 Shuv + Kickflip combo.", prereqs: ["kickflip", "three_shuv"] },
         { id: "full_cab", name: "Full-Cab", description: "Fakie 360 Ollie.", prereqs: ["half_cab"] }
       ]}
     };
 
     const tricksData = Object.keys(tierConfig).flatMap(lvl => tierConfig[lvl].tricks.map(t => ({ ...t, level: parseInt(lvl) })));
-    let allStudents = JSON.parse(localStorage.getItem('skate_v11')) || [{ id: "s1", name: "New Skater", progress: {}, stance: 'Regular', notes: '', schedule: {}, goals: '' }];
-    let currentId = localStorage.getItem('skate_id_v11') || allStudents[0].id;
+    let allStudents = JSON.parse(localStorage.getItem('skate_v12')) || [{ id: "s1", name: "New Skater", progress: {}, trickData: {}, stance: 'Regular', notes: '', schedule: {}, goals: '' }];
+    let currentId = localStorage.getItem('skate_id_v12') || allStudents[0].id;
     let viewMode = 'grid', timerInterval = null, totalSec = 0;
 
     function getS() { return allStudents.find(s => s.id === currentId) || allStudents[0]; }
-    function save() { localStorage.setItem('skate_v11', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v11', currentId); }
+    function save() { localStorage.setItem('skate_v12', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v12', currentId); }
 
     function render() {
       const s = getS();
       document.getElementById('statsProgress').textContent = `${Object.keys(s.progress).length}/${tricksData.length}`;
       document.getElementById('stanceBtn').textContent = s.stance || 'Regular';
-      document.getElementById('trainerNotes').value = s.notes || '';
       
-      document.getElementById('btnGrid').className = viewMode === 'grid' ? 'py-2 rounded btn-active text-[10px] font-bold' : 'py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold';
-      document.getElementById('btnTree').className = viewMode === 'tree' ? 'py-2 rounded btn-active text-[10px] font-bold' : 'py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold';
-      document.getElementById('btnSched').className = viewMode === 'schedule' ? 'py-2 rounded btn-active text-[10px] font-bold' : 'py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold';
-
       const container = document.getElementById('main-container');
       container.innerHTML = '';
+      
+      document.getElementById('btnGrid').className = viewMode === 'grid' ? 'py-2 rounded btn-active text-[10px] font-bold' : 'py-2 rounded bg-zinc-800 text-zinc-400 text-[10px] font-bold';
+      document.getElementById('btnTree').className = viewMode === 'tree' ? 'py-2 rounded btn-active text-[10px] font-bold' : 'py-2 rounded bg-zinc-800 text-zinc-400 text-[10px] font-bold';
+      document.getElementById('btnSched').className = viewMode === 'schedule' ? 'py-2 rounded btn-active text-[10px] font-bold' : 'py-2 rounded bg-zinc-800 text-zinc-400 text-[10px] font-bold';
+
       if (viewMode === 'grid') renderGrid(s); 
       else if (viewMode === 'tree') renderTree(s);
       else renderSchedule(s);
@@ -157,43 +158,73 @@
 
     function renderGrid(student) {
       Object.keys(tierConfig).forEach(lvl => {
+        const rowTricks = tierConfig[lvl].tricks;
+        const completed = rowTricks.filter(t => student.progress[t.id]).length;
+        const xpPercent = (completed / rowTricks.length) * 100;
+
         const section = document.createElement('div');
         section.className = `tier-wrapper`;
-        section.innerHTML = `<h2 class="font-black italic uppercase text-xs text-zinc-500 mb-4">${tierConfig[lvl].name}</h2><div class="grid grid-cols-2 md:grid-cols-4 gap-3">${tierConfig[lvl].tricks.map(t => {
-            const unlocked = student.progress[t.id];
-            const ready = t.prereqs.every(p => student.progress[p]);
-            return `<div onclick="openModal('${t.id}')" class="trick-card p-3 cursor-pointer ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}"><h3 class="font-bold text-[11px] uppercase">${t.name}</h3></div>`;
-        }).join('')}</div>`;
+        section.innerHTML = `
+            <div class="flex justify-between items-end">
+                <h2 class="font-black italic uppercase text-xs text-zinc-500">Tier ${lvl}: ${tierConfig[lvl].name}</h2>
+                <span class="text-[9px] font-bold text-orange-500">${Math.round(xpPercent)}% XP</span>
+            </div>
+            <div class="xp-bar-bg"><div class="xp-bar-fill" style="width: ${xpPercent}%"></div></div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                ${rowTricks.map(t => {
+                    const unlocked = student.progress[t.id];
+                    const ready = t.prereqs.every(p => student.progress[p]);
+                    const conf = (student.trickData[t.id] || {}).confidence || 0;
+                    return `
+                    <div onclick="openModal('${t.id}')" class="trick-card p-3 cursor-pointer ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}">
+                        <h3 class="font-bold text-[11px] uppercase">${t.name}</h3>
+                        <div class="confidence-dots">
+                            <div class="dot ${conf >= 1 ? 'active' : ''}"></div>
+                            <div class="dot ${conf >= 2 ? 'active' : ''}"></div>
+                            <div class="dot ${conf >= 3 ? 'active' : ''}"></div>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>`;
         document.getElementById('main-container').appendChild(section);
       });
     }
 
-    function renderTree(student) {
-        const nodeW = 120, nodeH = 45, gapX = 40, gapY = 80;
-        const pos = {};
-        const sortedTiers = Object.keys(tierConfig).sort();
-        let maxWidth = 0;
-        sortedTiers.forEach(lvl => maxWidth = Math.max(maxWidth, tierConfig[lvl].tricks.length * (nodeW + gapX)));
-        sortedTiers.forEach((lvl, row) => {
-            const rowTricks = tierConfig[lvl].tricks;
-            const startX = (maxWidth - (rowTricks.length * (nodeW + gapX))) / 2;
-            rowTricks.forEach((t, col) => pos[t.id] = { x: startX + col * (nodeW + gapX), y: row * (nodeH + gapY) + 40 });
-        });
-        let lines = '', nodes = '';
-        tricksData.forEach(t => {
-            const p = pos[t.id];
-            t.prereqs.forEach(pid => {
-                const parent = pos[pid];
-                if (parent) {
-                    const lit = student.progress[t.id] && student.progress[pid];
-                    lines += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${lit ? 'lit' : ''}" />`;
-                }
-            });
-            const status = student.progress[t.id] ? 'node-unlocked' : (t.prereqs.every(pr => student.progress[pr]) ? 'node-available' : '');
-            nodes += `<g class="tree-node ${status}" onclick="openModal('${t.id}')"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" rx="8" fill="#18181b" stroke="#333" stroke-width="2"/><text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 4}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text></g>`;
-        });
-        document.getElementById('main-container').innerHTML = `<div class="tree-container-wrapper"><svg class="tree-svg" style="width:${maxWidth}px; height:${sortedTiers.length * (nodeH + gapY) + 100}px">${lines}${nodes}</svg></div>`;
+    function openModal(id) {
+      const t = tricksData.find(x => x.id === id), s = getS();
+      if(!s.trickData[id]) s.trickData[id] = { confidence: 0, notes: '' };
+      const data = s.trickData[id];
+
+      document.getElementById('modal-content').innerHTML = `
+        <h2 class="text-lg font-black italic neon-orange uppercase mb-1">${t.name}</h2>
+        <p class="text-zinc-500 text-[10px] uppercase mb-4">Tier ${t.level} Mastery</p>
+        
+        <div class="mb-6">
+            <label class="text-[10px] font-bold text-zinc-400 uppercase block mb-2">Confidence Level</label>
+            <div class="flex gap-4">
+                ${[1, 2, 3].map(n => `
+                    <button onclick="setConfidence('${id}', ${n})" class="flex-1 py-2 rounded-lg border ${data.confidence >= n ? 'bg-orange-600 border-orange-400' : 'bg-zinc-800 border-zinc-700'} text-[10px] font-bold uppercase">
+                        ${n === 1 ? 'Sketchy' : n === 2 ? 'Solid' : 'Bolted'}
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <label class="text-[10px] font-bold text-zinc-400 uppercase block mb-2">Battle Notes (Trainer Cues)</label>
+            <textarea oninput="saveTrickNotes('${id}', this.value)" class="w-full p-3 rounded-xl text-xs" rows="3" placeholder="Shoulders square, pop harder...">${data.notes || ''}</textarea>
+        </div>
+
+        <button onclick="toggleTrick('${id}')" class="w-full py-4 ${s.progress[id] ? 'bg-zinc-800' : 'bg-green-600'} rounded-xl font-bold text-xs uppercase">
+            ${s.progress[id] ? 'Mark as Incomplete' : 'Complete Trick'}
+        </button>`;
+      document.getElementById('modal-overlay').classList.remove('hidden');
     }
+
+    window.setConfidence = (tid, val) => { getS().trickData[tid].confidence = val; save(); openModal(tid); render(); };
+    window.saveTrickNotes = (tid, val) => { getS().trickData[tid].notes = val; save(); };
+    window.toggleTrick = (id) => { const s = getS(); if (s.progress[id]) delete s.progress[id]; else s.progress[id] = true; save(); render(); closeModal(); };
+    window.closeModal = () => document.getElementById('modal-overlay').classList.add('hidden');
 
     function renderSchedule(student) {
         const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -208,52 +239,25 @@
                     ${days.filter(d => sched[d]).map(d => `
                         <div class="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-zinc-800">
                             <span class="text-[10px] font-bold w-8 text-orange-500">${d}</span>
-                            <input type="date" value="${sched[d].date || ''}" onchange="updateSched('${d}', 'date', this.value)">
-                            <input type="time" value="${sched[d].time || ''}" onchange="updateSched('${d}', 'time', this.value)">
+                            <input type="date" class="bg-transparent border-none text-[10px]" value="${sched[d].date || ''}" onchange="updateSched('${d}', 'date', this.value)">
+                            <input type="time" class="bg-transparent border-none text-[10px]" value="${sched[d].time || ''}" onchange="updateSched('${d}', 'time', this.value)">
                         </div>
                     `).join('')}
                 </div>
                 <h3 class="text-xs font-black uppercase text-orange-500 mb-2">Weekly Goal</h3>
-                <textarea oninput="saveGoals(this.value)" class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-xs text-zinc-300 outline-none" rows="3" placeholder="Set a target...">${student.goals || ''}</textarea>
+                <textarea oninput="saveGoals(this.value)" class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-xs text-zinc-300 outline-none" rows="3" placeholder="What are we landing this week?">${student.goals || ''}</textarea>
             </div>`;
     }
 
-    window.toggleDay = (day) => { 
-        const s = getS(); if(!s.schedule) s.schedule = {};
-        if(s.schedule[day]) delete s.schedule[day];
-        else s.schedule[day] = { date: '', time: '' };
-        save(); render();
-    };
+    window.toggleDay = (day) => { const s = getS(); s.schedule[day] = s.schedule[day] ? null : { date: '', time: '' }; if(!s.schedule[day]) delete s.schedule[day]; save(); render(); };
     window.updateSched = (day, field, val) => { getS().schedule[day][field] = val; save(); };
     window.saveGoals = (val) => { getS().goals = val; save(); };
-    window.saveNotes = (val) => { getS().notes = val; save(); };
     window.setView = (v) => { viewMode = v; render(); };
-    window.toggleTrick = (id) => { const s = getS(); if (s.progress[id]) delete s.progress[id]; else s.progress[id] = true; save(); render(); closeModal(); };
-    window.closeModal = () => document.getElementById('modal-overlay').classList.add('hidden');
-    
-    function openModal(id) {
-      const t = tricksData.find(x => x.id === id), s = getS();
-      document.getElementById('modal-content').innerHTML = `
-        <h2 class="text-lg font-black italic neon-orange uppercase mb-2">${t.name}</h2>
-        <p class="text-zinc-400 text-xs mb-6">${t.description}</p>
-        <button onclick="toggleTrick('${id}')" class="w-full py-4 bg-orange-600 rounded-xl font-bold text-xs uppercase">${s.progress[id] ? 'Unlearn' : 'Mastered'}</button>`;
-      document.getElementById('modal-overlay').classList.remove('hidden');
-    }
 
-    window.addStudent = () => { const name = prompt("Skater Name:"); if(name) { const newS = { id: 's'+Date.now(), name, progress: {}, stance: 'Regular', notes: '', schedule: {}, goals: '' }; allStudents.push(newS); currentId = newS.id; save(); init(); } };
-    window.deleteStudent = () => { if(allStudents.length > 1 && confirm("Delete skater?")) { allStudents = allStudents.filter(s => s.id !== currentId); currentId = allStudents[0].id; save(); init(); } };
+    window.addStudent = () => { const name = prompt("Student Name:"); if(name) { const newS = { id: 's'+Date.now(), name, progress: {}, trickData: {}, stance: 'Regular', notes: '', schedule: {}, goals: '' }; allStudents.push(newS); currentId = newS.id; save(); init(); } };
+    window.deleteStudent = () => { if(allStudents.length > 1 && confirm("Delete student?")) { allStudents = allStudents.filter(s => s.id !== currentId); currentId = allStudents[0].id; save(); init(); } };
     window.switchStudent = (id) => { currentId = id; save(); render(); };
     window.toggleStance = () => { const s = getS(); s.stance = s.stance === 'Regular' ? 'Goofy' : 'Regular'; save(); render(); };
-
-    window.exportData = () => {
-        const blob = new Blob([JSON.stringify(allStudents)], {type: 'application/json'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'demented_backup.json'; a.click();
-    };
-    window.importData = (e) => {
-        const reader = new FileReader();
-        reader.onload = (event) => { allStudents = JSON.parse(event.target.result); currentId = allStudents[0].id; save(); init(); };
-        reader.readAsText(e.target.files[0]);
-    };
 
     window.toggleTimer = () => {
       const btn = document.getElementById('timerBtn');
