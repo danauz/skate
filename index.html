@@ -3,36 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🛹 Academy Pro: Master Build</title>
+  <title>🛹 Academy Pro: Demented Build</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root { --bg: #09090b; --surface: #18181b; --orange: #9a3412; --green: #14532d; --border: #27272a; }
+    :root { 
+        --bg: #050505; 
+        --surface: #111113; 
+        --orange: #ff5f00; /* Vivid Safety Orange */
+        --green: #22c55e; 
+        --border: #27272a; 
+    }
     body { background-color: var(--bg); color: #ffffff; font-family: sans-serif; overflow-x: hidden; margin: 0; }
-    .btn-active { background-color: var(--orange) !important; color: white !important; }
-    .tier-wrapper { margin-bottom: 2.5rem; border-left: 4px solid var(--border); padding-left: 1rem; }
-    .xp-bar-bg { width: 100%; height: 6px; background: #111; border-radius: 10px; margin: 8px 0 16px 0; overflow: hidden; border: 1px solid var(--border); }
-    .xp-bar-fill { height: 100%; background: var(--orange); transition: width 0.5s ease; }
+    
+    /* Active Button Glow */
+    .btn-active { 
+        background-color: var(--orange) !important; 
+        color: white !important; 
+        box-shadow: 0 0 15px rgba(255, 95, 0, 0.4);
+        font-weight: 900;
+    }
+    
+    .tier-wrapper { margin-bottom: 2.5rem; border-left: 4px solid #1a1a1c; padding-left: 1rem; }
+    
+    /* High-Voltage XP Bar */
+    .xp-bar-bg { width: 100%; height: 8px; background: #000; border-radius: 10px; margin: 8px 0 16px 0; overflow: hidden; border: 1px solid #222; }
+    .xp-bar-fill { 
+        height: 100%; 
+        background: var(--orange); 
+        box-shadow: 0 0 12px var(--orange); 
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+    }
+
+    /* Card Polishing */
     .trick-card { transition: all 0.2s ease; border: 2px solid var(--border); background-color: var(--surface); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; border-radius: 12px; cursor: pointer; }
-    .trick-card.unlocked { border-color: var(--green); background: linear-gradient(135deg, var(--surface), #064e3b33); }
-    .trick-card.locked { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
-    .trick-card.available { border-color: var(--orange); border-style: dashed; }
-    .dot { width: 6px; height: 6px; border-radius: 50%; background: #333; }
-    .dot.active { background: var(--orange); }
+    .trick-card.unlocked { border-color: var(--green); background: linear-gradient(135deg, #111113, #064e3b66); box-shadow: 0 0 10px rgba(34, 197, 94, 0.15); }
+    .trick-card.locked { opacity: 0.2; filter: grayscale(1); pointer-events: none; }
+    .trick-card.available { border-color: var(--orange); border-style: dashed; box-shadow: inset 0 0 15px rgba(255, 95, 0, 0.1); }
+    
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #222; }
+    .dot.active { 
+        background: var(--orange); 
+        box-shadow: 0 0 8px var(--orange); 
+    }
+
+    /* Daily Mission HUD */
+    .mission-card {
+        background: linear-gradient(180deg, rgba(20,20,22,1) 0%, rgba(10,10,12,1) 100%);
+        border: 2px solid rgba(255, 95, 0, 0.4);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255, 95, 0, 0.1);
+    }
+
     .tree-container-wrapper { width: 100%; height: 60vh; background: #000; border-radius: 12px; border: 1px solid var(--border); overflow: auto; }
-    .tree-svg { display: block; background: radial-gradient(circle, #111 1px, transparent 1px); background-size: 30px 30px; }
-    .node-unlocked rect { stroke: var(--green); fill: #064e3b; }
-    .node-available rect { stroke: var(--orange); stroke-dasharray: 4; }
-    .node-locked { opacity: 0.3; }
-    .tree-svg line { stroke: #333; stroke-width: 2; }
-    .tree-svg line.lit { stroke: var(--green); stroke-width: 3; }
-    .timer-active { animation: pulse 2s infinite; background-color: #ef4444 !important; }
+    .tree-svg line.lit { stroke: var(--green); stroke-width: 3; filter: drop-shadow(0 0 5px var(--green)); }
+    
+    .timer-active { animation: pulse 1s infinite; background-color: #ff0000 !important; box-shadow: 0 0 20px rgba(255,0,0,0.4); }
     input, textarea, select { background: #000 !important; border: 1px solid var(--border) !important; color: white !important; outline: none; }
     @keyframes pulse { 50% { opacity: 0.7; } }
   </style>
 </head>
 <body class="pb-24">
   <div class="max-w-5xl mx-auto p-4">
-    <header class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 mb-4">
+    <header class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 mb-4 shadow-xl">
       <div class="flex justify-between items-start mb-4">
         <div>
           <h1 class="text-xl font-black italic uppercase tracking-tighter text-zinc-100">Academy Coach</h1>
@@ -40,7 +71,7 @@
         </div>
         <div class="flex flex-col items-end gap-2">
           <button id="timerBtn" onclick="toggleTimer()" class="bg-zinc-800 text-[9px] font-bold uppercase px-3 py-1 rounded border border-zinc-700 hover:bg-zinc-700 transition-colors">Start Session</button>
-          <button id="globalStance" onclick="toggleStance()" class="text-[10px] font-black uppercase text-orange-800 bg-black px-3 py-1 rounded-full border border-zinc-800 shadow-sm">
+          <button id="globalStance" onclick="toggleStance()" class="text-[10px] font-black uppercase text-orange-500 bg-black px-3 py-1 rounded-full border border-orange-900/30 shadow-sm">
             REGULAR 🛹
           </button>
         </div>
@@ -137,40 +168,30 @@
 
     function renderGrid(student) {
         const container = document.getElementById('main-container');
-        
-        // DAILY CHALLENGE SEEDING
         const available = tricksData.filter(t => !student.progress[t.id] && t.pre.every(p => student.progress[p]));
         const today = new Date().toDateString();
-        let seed = 0;
-        const seedStr = today + student.id; 
+        let seed = 0; const seedStr = today + student.id; 
         for (let i = 0; i < seedStr.length; i++) seed = ((seed << 5) - seed) + seedStr.charCodeAt(i);
-        
-        const getSeededRandom = () => {
-            seed = (seed * 9301 + 49297) % 233280;
-            return seed / 233280;
-        };
-
-        const challengeTricks = [];
-        const pool = [...available];
+        const getSeededRandom = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+        const challengeTricks = []; const pool = [...available];
         while(challengeTricks.length < 3 && pool.length > 0) {
             const index = Math.floor(getSeededRandom() * pool.length);
             challengeTricks.push(pool.splice(index, 1)[0]);
         }
 
         let challengeHTML = `
-            <div class="bg-zinc-900/50 p-4 rounded-2xl mb-8 border border-orange-900/30 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-orange-900/5 blur-3xl -z-10"></div>
-                <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-orange-800">Daily Challenge</h2>
-                    <span class="text-[7px] font-bold text-zinc-600 border border-zinc-800 px-2 py-0.5 rounded italic uppercase">Demented DU</span>
+            <div class="mission-card p-5 rounded-2xl mb-8 relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-[11px] font-black uppercase tracking-[0.3em] text-orange-500">Daily Mission</h2>
+                    <span class="text-[8px] font-black bg-orange-600 text-white px-2 py-0.5 rounded italic tracking-tighter">DEMENTED DU</span>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
+                <div class="grid grid-cols-3 gap-3">
                     ${challengeTricks.length > 0 ? challengeTricks.map(t => `
-                        <div onclick="openModal('${t.id}')" class="bg-black/40 p-3 rounded-xl border border-zinc-800 text-center active:scale-95 transition-transform">
-                            <div class="text-[9px] font-black text-zinc-400 uppercase mb-1 truncate">${t.name}</div>
-                            <div class="text-[7px] font-bold text-orange-900 uppercase">Target</div>
+                        <div onclick="openModal('${t.id}')" class="bg-zinc-900/80 p-3 rounded-xl border border-orange-500/20 text-center active:scale-95 transition-all hover:border-orange-500">
+                            <div class="text-[10px] font-black text-white uppercase mb-1 truncate">${t.name}</div>
+                            <div class="text-[7px] font-bold text-orange-500 uppercase tracking-widest">Target</div>
                         </div>
-                    `).join('') : '<div class="col-span-3 text-[9px] text-zinc-600 py-2 italic text-center">ZONE CLEAR</div>'}
+                    `).join('') : '<div class="col-span-3 text-[10px] text-zinc-600 py-4 italic text-center font-black uppercase">Session Complete</div>'}
                 </div>
             </div>
         `;
@@ -181,11 +202,11 @@
             const xp = (row.filter(t => student.progress[t.id]).length / row.length) * 100;
             const section = document.createElement('div'); section.className = `tier-wrapper`;
             section.innerHTML = `
-                <div class="flex justify-between items-end"><h2 class="font-black italic uppercase text-xs text-zinc-500">Tier ${lvl}</h2><span class="text-[9px] font-bold text-orange-900">${Math.round(xp)}% XP</span></div>
+                <div class="flex justify-between items-end"><h2 class="font-black italic uppercase text-xs text-zinc-500">Tier ${lvl}</h2><span class="text-[9px] font-bold text-orange-500">${Math.round(xp)}% XP</span></div>
                 <div class="xp-bar-bg"><div class="xp-bar-fill" style="width: ${xp}%"></div></div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">${row.map(t => {
                     const unlocked = student.progress[t.id], ready = t.pre.every(p => student.progress[p]), conf = (student.trickData[t.id] || {}).confidence || 0;
-                    return `<div onclick="openModal('${t.id}')" class="trick-card p-3 ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}"><h3 class="font-bold text-[10px] uppercase">${t.name}</h3><div class="confidence-dots flex gap-1 mt-2">${[1,2,3].map(n => `<div class="dot ${conf >= n ? 'active' : ''}"></div>`).join('')}</div></div>`;
+                    return `<div onclick="openModal('${t.id}')" class="trick-card p-3 ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}"><h3 class="font-bold text-[11px] uppercase ${unlocked ? 'text-green-400' : (ready ? 'text-white' : 'text-zinc-600')}">${t.name}</h3><div class="confidence-dots flex gap-1 mt-2">${[1,2,3].map(n => `<div class="dot ${conf >= n ? 'active' : ''}"></div>`).join('')}</div></div>`;
                 }).join('')}</div>`;
             container.appendChild(section);
         });
@@ -216,12 +237,12 @@
         document.getElementById('main-container').innerHTML = `
             <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
                 <div class="grid grid-cols-7 gap-1 mb-8">
-                    ${days.map(d => `<button onclick="toggleDay('${d}')" class="py-3 text-[10px] font-bold rounded-lg border ${student.plan && student.plan[d] ? 'bg-orange-900 border-orange-800' : 'bg-zinc-800 border-zinc-700 text-zinc-500'}">${d}</button>`).join('')}
+                    ${days.map(d => `<button onclick="toggleDay('${d}')" class="py-3 text-[10px] font-bold rounded-lg border ${student.plan && student.plan[d] ? 'bg-orange-600 border-orange-500' : 'bg-zinc-800 border-zinc-700 text-zinc-500'}">${d}</button>`).join('')}
                 </div>
-                <h3 class="text-[10px] font-black uppercase text-orange-900 mb-3 tracking-widest">Upcoming Sessions</h3>
+                <h3 class="text-[10px] font-black uppercase text-orange-500 mb-3 tracking-widest">Upcoming Sessions</h3>
                 <div class="flex gap-2 mb-4">
                     <input type="datetime-local" id="schedDate" class="flex-1 bg-black border border-zinc-800 p-2 text-[10px] rounded-lg">
-                    <button onclick="addScheduledSession()" class="bg-orange-900 px-4 py-2 rounded-lg text-[10px] font-black uppercase">Add</button>
+                    <button onclick="addScheduledSession()" class="bg-orange-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase">Add</button>
                 </div>
                 <div class="space-y-2 mb-8">
                     ${student.scheduledSessions.length === 0 ? '<p class="text-[9px] text-zinc-600 italic">No upcoming sessions set.</p>' : 
@@ -232,7 +253,7 @@
                         </div>
                     `).join('')}
                 </div>
-                <h3 class="text-[10px] font-black uppercase text-orange-900 mb-2 tracking-widest">Weekly Battle Goal</h3>
+                <h3 class="text-[10px] font-black uppercase text-orange-500 mb-2 tracking-widest">Weekly Battle Goal</h3>
                 <textarea oninput="saveGoal(this.value)" class="w-full bg-black border border-zinc-800 p-4 text-xs rounded-xl mb-6" rows="4" placeholder="Weekly Battle Goal...">${student.goal || ''}</textarea>
             </div>`;
     }
@@ -240,11 +261,11 @@
     function renderHistory(student) {
         document.getElementById('main-container').innerHTML = `
             <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl">
-                <h3 class="text-xs font-black uppercase text-orange-900 mb-4">Session Log</h3>
+                <h3 class="text-xs font-black uppercase text-orange-500 mb-4">Session Log</h3>
                 ${(student.history || []).slice().reverse().map(l => `
-                    <div class="bg-black p-3 rounded-xl border-l-2 border-orange-900 mb-2">
+                    <div class="bg-black p-3 rounded-xl border-l-2 border-orange-600 mb-2">
                         <div class="flex justify-between text-[10px] font-bold">
-                            <span class="text-orange-900">${l.date}</span>
+                            <span class="text-orange-500">${l.date}</span>
                             <span class="text-zinc-500">${Math.floor(l.duration/60)}m ${l.duration%60}s</span>
                         </div>
                         <p class="text-xs text-zinc-300 mt-1">${l.note}</p>
@@ -268,10 +289,10 @@
     window.openModal = (id) => {
         const t = tricksData.find(x => x.id === id), s = getS(); s.trickData[id] = s.trickData[id] || { confidence: 0, notes: '' };
         document.getElementById('modal-content').innerHTML = `
-            <h2 class="text-lg font-black italic text-orange-900 uppercase mb-4">${t.name}</h2>
-            <div class="flex gap-1 mb-6">${[1,2,3].map(n => `<button onclick="setConfidence('${id}',${n})" class="flex-1 py-3 rounded-lg border text-[9px] font-bold uppercase ${s.trickData[id].confidence>=n?'bg-orange-900 border-orange-800':'bg-zinc-800 border-zinc-700'}">${n==3?'Bolt':n==2?'Solid':'Sketch'}</button>`).join('')}</div>
+            <h2 class="text-lg font-black italic text-orange-500 uppercase mb-4">${t.name}</h2>
+            <div class="flex gap-1 mb-6">${[1,2,3].map(n => `<button onclick="setConfidence('${id}',${n})" class="flex-1 py-3 rounded-lg border text-[9px] font-bold uppercase ${s.trickData[id].confidence>=n?'bg-orange-600 border-orange-500':'bg-zinc-800 border-zinc-700'}">${n==3?'Bolt':n==2?'Solid':'Sketch'}</button>`).join('')}</div>
             <textarea oninput="saveNote('${id}',this.value)" class="w-full p-3 rounded-xl text-xs mb-4 bg-black border border-zinc-800 text-white" rows="3" placeholder="Notes...">${s.trickData[id].notes}</textarea>
-            <button onclick="toggleTrick('${id}')" class="w-full py-4 ${s.progress[id]?'bg-zinc-800':'bg-green-900'} rounded-xl font-bold text-xs uppercase transition-colors">${s.progress[id]?'Undo':'Mastered'}</button>`;
+            <button onclick="toggleTrick('${id}')" class="w-full py-4 ${s.progress[id]?'bg-zinc-800 text-white':'bg-green-600 text-white'} rounded-xl font-black text-xs uppercase shadow-lg transition-colors">${s.progress[id]?'Undo Progress':'Mark Mastered'}</button>`;
         document.getElementById('modal-overlay').classList.remove('hidden');
     }
 
