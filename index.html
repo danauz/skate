@@ -88,7 +88,7 @@
 /* ==========================================
         TRICK REPOSITORY (TIER-BASED)
        ========================================== */
-    const tierConfig = {
+const tierConfig = {
       1: {
         name: "Fundamentals (Tier 1)",
         tricks: [
@@ -105,11 +105,14 @@
         name: "Basic (Tier 2)",
         tricks: [
           { id: "kickturn", name: "Kickturn", description: "Pivot turns on ramp/flat.", tips: "Point your front shoulder.", prereqs: ["push", "tictac"] },
+          { id: "running_start", name: "Running Start", description: "Run and jump on.", tips: "Look where you want to go.", prereqs: ["push"] },
+          { id: "hippie_jump", name: "Hippie Jump", description: "Jump and land on bolts.", tips: "Stay balanced over center.", prereqs: ["push", "falling"] },
+          { id: "ride_switch", name: "Switch", description: "Non-natural stance.", tips: "Pretend you're starting over!", prereqs: ["push"] },
           { id: "roll_in", name: "Roll in", description: "Rolling into a ramp.", tips: "Commit weight forward!", prereqs: ["push"] },
           { id: "drop_in", name: "Drop-In", description: "Entering from coping.", tips: "Slam those front wheels down!", prereqs: ["stop"] },
+          { id: "manual", name: "Manual", description: "2-wheel balance.", tips: "Use arms for balance.", prereqs: ["tictac"] },
           { id: "ollie", name: "Ollie", description: "Foundation jump.", tips: "Pop tail hard, slide foot up.", prereqs: ["push", "tictac", "stop"] },
-          { id: "shuvit", name: "Shuvit", description: "180 board spin.", tips: "Scoop the tail back.", prereqs: ["push"] },
-          { id: "fakie_ride", name: "Fakie Riding", description: "Riding backwards.", tips: "Look over your shoulder.", prereqs: ["push"] }
+          { id: "shuvit", name: "Shuvit", description: "180 board spin.", tips: "Scoop the tail back.", prereqs: ["push"] }
         ]
       },
       3: {
@@ -117,8 +120,10 @@
         tricks: [
           { id: "pop_shuvit", name: "Pop Shuvit", description: "180 board spin with a pop.", tips: "Pop it hard and scoop.", prereqs: ["shuvit"] },
           { id: "rock_to_fakie", name: "Rock to Fakie", description: "Stall and fakie out.", tips: "Lift front trucks over coping.", prereqs: ["drop_in"] },
-          { id: "fifty_fifty", name: "50-50 Grind", description: "Grinding both trucks.", tips: "Ollie straight onto the ledge.", prereqs: ["ollie"] },
-          { id: "fakie_ollie", name: "Fakie Ollie", description: "An ollie while riding fakie.", tips: "Pop the nose (which is now your tail).", prereqs: ["fakie_ride", "ollie"] }
+          { id: "caveman", name: "Caveman", description: "Jump onto board.", tips: "Hold nose, jump, and place.", prereqs: ["stance"] },
+          { id: "boneless", name: "Boneless", description: "Grab, plant, jump.", tips: "Plant front foot and jump.", prereqs: ["tictac"] },
+          { id: "fly_out", name: "Fly Out", description: "Exit ramp to flat.", tips: "Level board in air.", prereqs: ["pumping"] },
+          { id: "fifty_fifty", name: "50-50 Grind", description: "Grinding both trucks.", tips: "Ollie straight onto the ledge.", prereqs: ["ollie"] }
         ]
       },
       4: {
@@ -126,15 +131,14 @@
         tricks: [
           { id: "kickflip", name: "Kickflip", description: "The classic board flip.", tips: "Flick off the pocket of the nose.", prereqs: ["ollie"] },
           { id: "three_shuv", name: "360 Shuvit", description: "Full rotation spin.", tips: "Big scoop with the back foot toes.", prereqs: ["pop_shuvit"] },
-          { id: "boardslide", name: "Boardslide", description: "Sliding on the middle of the deck.", tips: "Keep weight centered over the rail.", prereqs: ["fifty_fifty"] },
-          { id: "half_cab", name: "Half-Cab", description: "Fakie 180 Ollie.", tips: "Swing your shoulders as you pop.", prereqs: ["fakie_ollie"] }
+          { id: "spine_transfer", name: "Spine Transfer", description: "Over a spine peak.", tips: "Lean forward over peak.", prereqs: ["fly_out"] },
+          { id: "boardslide", name: "Boardslide", description: "Sliding on the middle of the deck.", tips: "Keep weight centered over the rail.", prereqs: ["fifty_fifty"] }
         ]
       },
       5: {
         name: "Pro (Tier 5)",
         tricks: [
-          { id: "tre_flip", name: "360 Kickflip", description: "The 360 Shuv + Kickflip combo.", tips: "All in the scoop!", prereqs: ["kickflip", "three_shuv"] },
-          { id: "full_cab", name: "Full-Cab", description: "Fakie 360 Ollie.", tips: "Commit to the full rotation.", prereqs: ["half_cab"] }
+          { id: "tre_flip", name: "360 Kickflip", description: "The 360 Shuv + Kickflip combo.", tips: "All in the scoop!", prereqs: ["kickflip", "three_shuv"] }
         ]
       }
     };
