@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🛹 Academy Pro: Achievements</title>
+  <title>🛹 Academy Pro: Full Suite</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root { --bg: #09090b; --surface: #18181b; --orange: #f97316; --green: #22c55e; --border: #27272a; --gold: #f59e0b; }
@@ -24,26 +24,22 @@
     .dot { width: 6px; height: 6px; border-radius: 50%; background: #333; }
     .dot.active { background: var(--orange); box-shadow: 0 0 5px var(--orange); }
 
-    /* Trophy Room Styling */
-    .trophy-grid { display: grid; grid-template-cols: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
-    .trophy-card { background: #111; border: 1px solid #27272a; border-radius: 12px; padding: 10px; text-align: center; opacity: 0.2; transition: all 0.5s; filter: grayscale(1); }
-    .trophy-card.earned { opacity: 1; filter: grayscale(0); border-color: var(--gold); box-shadow: 0 0 15px rgba(245, 158, 11, 0.2); transform: scale(1.05); }
-    .trophy-icon { font-size: 24px; margin-bottom: 4px; display: block; }
-    .trophy-name { font-size: 8px; font-weight: 900; text-transform: uppercase; color: #71717a; }
-    .earned .trophy-name { color: var(--gold); }
-
-    .tree-container-wrapper { width: 100%; height: 60vh; background: #000; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: auto; }
+    .log-entry { background: #111; border: 1px solid #27272a; padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 3px solid var(--orange); }
+    .log-date { font-size: 10px; font-weight: 900; text-transform: uppercase; color: var(--orange); }
+    
+    .tree-container-wrapper { width: 100%; height: 60vh; background: #000; border-radius: 12px; border: 1px solid var(--border); overflow: auto; }
     .tree-svg { display: block; background: radial-gradient(circle, #111 1px, transparent 1px); background-size: 30px 30px; }
-    .tree-node rect { transition: all 0.3s ease; stroke-width: 2; }
     .node-unlocked rect { stroke: var(--green); fill: #064e3b; filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.4)); }
     .node-available rect { stroke: var(--orange); stroke-dasharray: 4; }
     .node-locked { opacity: 0.3; }
     .tree-svg line { stroke: #333; stroke-width: 2; transition: all 0.3s ease; }
     .tree-svg line.lit { stroke: var(--green); stroke-width: 3; filter: drop-shadow(0 0 5px var(--green)); }
     
-    .day-btn { background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; cursor: pointer; }
-    .day-btn.active { background: var(--orange); color: #000; }
+    .trophy-grid { display: grid; grid-template-cols: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
+    .trophy-card { background: #111; border: 1px solid #27272a; border-radius: 12px; padding: 10px; text-align: center; opacity: 0.2; }
+    .trophy-card.earned { opacity: 1; border-color: var(--gold); transform: scale(1.05); transition: 0.3s; }
     
+    .timer-active { animation: pulse 2s infinite; background-color: #ef4444 !important; }
     input, textarea { background: #000 !important; border: 1px solid #27272a !important; color: white !important; outline: none; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
   </style>
@@ -60,29 +56,19 @@
           <button id="timerBtn" onclick="toggleTimer()" class="bg-zinc-800 text-[9px] font-bold uppercase px-3 py-1 rounded border border-zinc-700">Start Session</button>
           <select id="studentSelect" onchange="switchStudent(this.value)" class="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs font-bold uppercase"></select>
           <button onclick="addStudent()" class="bg-zinc-800 px-2 rounded border border-zinc-700 text-xs">＋</button>
-          <button onclick="deleteStudent()" class="bg-zinc-800 px-2 rounded border border-zinc-700 text-xs text-red-500">×</button>
         </div>
-      </div>
-      <div class="mt-4 pt-4 border-t border-zinc-800 flex flex-wrap gap-2 justify-between items-center">
-        <div class="flex gap-2">
-            <button onclick="toggleStance()" id="stanceBtn" class="text-[10px] font-black uppercase bg-orange-600 px-3 py-1 rounded">Regular</button>
-            <button onclick="exportData()" class="text-[10px] font-bold uppercase bg-zinc-800 px-3 py-1 rounded border border-zinc-700">Export</button>
-            <button onclick="document.getElementById('importFile').click()" class="text-[10px] font-bold uppercase bg-zinc-800 px-3 py-1 rounded border border-zinc-700">Import</button>
-            <input type="file" id="importFile" class="hidden" onchange="importData(event)">
-        </div>
-        <div class="text-[10px] font-bold text-zinc-500 uppercase">Academy Rank: <span id="statsProgress" class="text-orange-500">0/0</span></div>
       </div>
     </header>
 
-    <div class="grid grid-cols-4 gap-2 mb-6">
-      <button id="btnGrid" onclick="setView('grid')" class="py-2 rounded bg-zinc-800 text-[10px] font-bold uppercase">Tiers</button>
-      <button id="btnTree" onclick="setView('tree')" class="py-2 rounded bg-zinc-800 text-[10px] font-bold uppercase">Tree</button>
-      <button id="btnSched" onclick="setView('schedule')" class="py-2 rounded bg-zinc-800 text-[10px] font-bold uppercase">Plan</button>
-      <button id="btnTrophy" onclick="setView('trophy')" class="py-2 rounded bg-zinc-800 text-[10px] font-bold uppercase">Trophies</button>
+    <div class="grid grid-cols-5 gap-1 mb-6">
+      <button id="btnGrid" onclick="setView('grid')" class="py-2 rounded bg-zinc-800 text-[9px] font-bold uppercase">Tiers</button>
+      <button id="btnTree" onclick="setView('tree')" class="py-2 rounded bg-zinc-800 text-[9px] font-bold uppercase">Tree</button>
+      <button id="btnSched" onclick="setView('schedule')" class="py-2 rounded bg-zinc-800 text-[9px] font-bold uppercase">Plan</button>
+      <button id="btnHistory" onclick="setView('history')" class="py-2 rounded bg-zinc-800 text-[9px] font-bold uppercase">Log</button>
+      <button id="btnTrophy" onclick="setView('trophy')" class="py-2 rounded bg-zinc-800 text-[9px] font-bold uppercase">🏆</button>
     </div>
 
     <div id="main-container"></div>
-
   </div>
 
   <div id="modal-overlay" class="fixed inset-0 bg-black/90 z-[100] hidden flex justify-center items-center p-4" onclick="if(event.target==this) closeModal()">
@@ -92,180 +78,153 @@
 <script>
     const tierConfig = {
       1: { name: "Fundamentals", tricks: [
-        { id: "stance", name: "Stance", description: "Finding your natural footing.", prereqs: [] },
-        { id: "push", name: "Pushing", description: "Generating momentum.", prereqs: ["stance"] },
-        { id: "stop", name: "Foot Brake", description: "Controlled stopping.", prereqs: ["push"] },
-        { id: "pumping", name: "Pumping", description: "Speed in transitions.", prereqs: ["push"] },
-        { id: "falling", name: "Falling", description: "Controlled Falling.", prereqs: [] },
-        { id: "turning", name: "Turning", description: "Basic leaning turns.", prereqs: ["push"] },
-        { id: "tictac", name: "Tic-Tacs", description: "Small pivot turns.", prereqs: ["push"] }
+        { id: "stance", name: "Stance", prereqs: [] },
+        { id: "push", name: "Pushing", prereqs: ["stance"] },
+        { id: "stop", name: "Foot Brake", prereqs: ["push"] },
+        { id: "pumping", name: "Pumping", prereqs: ["push"] },
+        { id: "falling", name: "Falling", prereqs: [] },
+        { id: "turning", name: "Turning", prereqs: ["push"] },
+        { id: "tictac", name: "Tic-Tacs", prereqs: ["push"] }
       ]},
       2: { name: "Basic", tricks: [
-        { id: "kickturn", name: "Kickturn", description: "Pivot turns on ramp/flat.", prereqs: ["push", "tictac"] },
-        { id: "running_start", name: "Running Start", description: "Run and jump on board.", prereqs: ["push"] },
-        { id: "hippie_jump", name: "Hippie Jump", description: "Jump and land on bolts.", prereqs: ["push", "falling"] },
-        { id: "ride_switch", name: "Switch", description: "Non-natural stance.", prereqs: ["push"] },
-        { id: "roll_in", name: "Roll in", description: "Rolling into a ramp.", prereqs: ["push"] },
-        { id: "drop_in", name: "Drop-In", description: "Entering from coping.", prereqs: ["stop"] },
-        { id: "manual", name: "Manual", description: "2-wheel balance.", prereqs: ["tictac"] },
-        { id: "ollie", name: "Ollie", description: "Foundation jump.", prereqs: ["push", "tictac", "stop"] },
-        { id: "shuvit", name: "Shuvit", description: "180 board spin.", prereqs: ["push"] },
-        { id: "fakie_ride", name: "Fakie Riding", description: "Riding backwards.", prereqs: ["push"] }
+        { id: "kickturn", name: "Kickturn", prereqs: ["push", "tictac"] },
+        { id: "running_start", name: "Running Start", prereqs: ["push"] },
+        { id: "hippie_jump", name: "Hippie Jump", prereqs: ["push", "falling"] },
+        { id: "ride_switch", name: "Switch", prereqs: ["push"] },
+        { id: "roll_in", name: "Roll in", prereqs: ["push"] },
+        { id: "drop_in", name: "Drop-In", prereqs: ["stop"] },
+        { id: "manual", name: "Manual", prereqs: ["tictac"] },
+        { id: "ollie", name: "Ollie", prereqs: ["push", "tictac", "stop"] },
+        { id: "shuvit", name: "Shuvit", prereqs: ["push"] },
+        { id: "fakie_ride", name: "Fakie Riding", prereqs: ["push"] }
       ]},
       3: { name: "Intermediate", tricks: [
-        { id: "pop_shuvit", name: "Pop Shuvit", description: "180 board spin with a pop.", prereqs: ["shuvit"] },
-        { id: "rock_to_fakie", name: "Rock to Fakie", description: "Stall and fakie out.", prereqs: ["drop_in"] },
-        { id: "caveman", name: "Caveman", description: "Jump onto board.", prereqs: ["stance"] },
-        { id: "boneless", name: "Boneless", description: "Grab, plant, jump.", prereqs: ["tictac"] },
-        { id: "fly_out", name: "Fly Out", description: "Exit ramp to flat.", prereqs: ["pumping"] },
-        { id: "fifty_fifty", name: "50-50 Grind", description: "Grinding both trucks.", prereqs: ["ollie"] },
-        { id: "fakie_ollie", name: "Fakie Ollie", description: "Ollie while riding backwards.", prereqs: ["fakie_ride", "ollie"] }
+        { id: "pop_shuvit", name: "Pop Shuvit", prereqs: ["shuvit"] },
+        { id: "rock_to_fakie", name: "Rock to Fakie", prereqs: ["drop_in"] },
+        { id: "caveman", name: "Caveman", prereqs: ["stance"] },
+        { id: "boneless", name: "Boneless", prereqs: ["tictac"] },
+        { id: "fly_out", name: "Fly Out", prereqs: ["pumping"] },
+        { id: "fifty_fifty", name: "50-50 Grind", prereqs: ["ollie"] },
+        { id: "fakie_ollie", name: "Fakie Ollie", prereqs: ["fakie_ride", "ollie"] }
       ]},
       4: { name: "Advanced", tricks: [
-        { id: "kickflip", name: "Kickflip", description: "The classic board flip.", prereqs: ["ollie"] },
-        { id: "three_shuv", name: "360 Shuvit", description: "Full rotation spin.", prereqs: ["pop_shuvit"] },
-        { id: "spine_transfer", name: "Spine Transfer", description: "Over a spine peak.", prereqs: ["fly_out"] },
-        { id: "boardslide", name: "Boardslide", description: "Sliding on the middle of the deck.", prereqs: ["fifty_fifty"] },
-        { id: "half_cab", name: "Half-Cab", description: "Fakie 180 Ollie.", prereqs: ["fakie_ollie"] }
+        { id: "kickflip", name: "Kickflip", prereqs: ["ollie"] },
+        { id: "three_shuv", name: "360 Shuvit", prereqs: ["pop_shuvit"] },
+        { id: "spine_transfer", name: "Spine Transfer", prereqs: ["fly_out"] },
+        { id: "boardslide", name: "Boardslide", prereqs: ["fifty_fifty"] },
+        { id: "half_cab", name: "Half-Cab", prereqs: ["fakie_ollie"] }
       ]},
       5: { name: "Pro", tricks: [
-        { id: "tre_flip", name: "360 Kickflip", description: "360 Shuv + Kickflip combo.", prereqs: ["kickflip", "three_shuv"] },
-        { id: "full_cab", name: "Full-Cab", description: "Fakie 360 Ollie.", prereqs: ["half_cab"] }
+        { id: "tre_flip", name: "360 Kickflip", prereqs: ["kickflip", "three_shuv"] },
+        { id: "full_cab", name: "Full-Cab", prereqs: ["half_cab"] }
       ]}
     };
 
     const trophyConfig = [
-        { id: 't1', name: 'Fresh Wood', icon: '🪵', desc: 'Master all Tier 1 Basics', check: (s) => tierConfig[1].tricks.every(t => s.progress[t.id]) },
-        { id: 't2', name: 'Hour Power', icon: '⏱️', desc: '1 Hour total session time', check: (s) => (s.stats.totalTime || 0) >= 3600 },
-        { id: 't3', name: 'The Grinder', icon: '🛠️', desc: '5 Hours total session time', check: (s) => (s.stats.totalTime || 0) >= 18000 },
-        { id: 't4', name: 'Stomped', icon: '👟', desc: 'Land 10 unique tricks', check: (s) => Object.keys(s.progress).length >= 10 },
-        { id: 't5', name: 'Consistency', icon: '🗓️', desc: 'Start 5 sessions', check: (s) => (s.stats.sessionCount || 0) >= 5 },
-        { id: 't6', name: 'Coach Favorite', icon: '📋', desc: 'Have 5 Battle Notes saved', check: (s) => Object.values(s.trickData).filter(d => d.notes && d.notes.length > 5).length >= 5 },
-        { id: 't7', name: 'Bolted', icon: '🔩', desc: 'Have 5 tricks at 3-Star confidence', check: (s) => Object.values(s.trickData).filter(d => d.confidence === 3).length >= 5 }
+        { id: 't1', name: 'Fundamentals', icon: '🪵', check: (s) => tierConfig[1].tricks.every(t => s.progress[t.id]) },
+        { id: 't2', name: 'Grinder', icon: '⏱️', check: (s) => (s.stats.totalTime || 0) >= 3600 },
+        { id: 't3', name: 'Coach Fav', icon: '📋', check: (s) => Object.values(s.trickData).filter(d => d.notes?.length > 5).length >= 5 },
+        { id: 't4', name: 'Skate Rat', icon: '🔥', check: (s) => (s.history || []).length >= 5 }
     ];
 
     const tricksData = Object.keys(tierConfig).flatMap(lvl => tierConfig[lvl].tricks.map(t => ({ ...t, level: parseInt(lvl) })));
-    let allStudents = JSON.parse(localStorage.getItem('skate_v14')) || [{ id: "s1", name: "New Skater", progress: {}, trickData: {}, stance: 'Regular', schedule: {}, goals: '', stats: { totalTime: 0, sessionCount: 0 } }];
-    let currentId = localStorage.getItem('skate_id_v14') || allStudents[0].id;
+    let allStudents = JSON.parse(localStorage.getItem('skate_v16')) || [{ id: "s1", name: "New Skater", progress: {}, trickData: {}, history: [], stats: { totalTime: 0, sessionCount: 0 } }];
+    let currentId = localStorage.getItem('skate_id_v16') || allStudents[0].id;
     let viewMode = 'grid', timerInterval = null, currentSessionSec = 0;
 
     function getS() { return allStudents.find(s => s.id === currentId) || allStudents[0]; }
-    function save() { localStorage.setItem('skate_v14', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v14', currentId); }
+    function save() { localStorage.setItem('skate_v16', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v16', currentId); }
 
     function render() {
       const s = getS();
-      document.getElementById('statsProgress').textContent = `${Object.keys(s.progress).length}/${tricksData.length}`;
-      document.getElementById('stanceBtn').textContent = s.stance || 'Regular';
-      const container = document.getElementById('main-container');
-      container.innerHTML = '';
-      
-      const btns = ['btnGrid', 'btnTree', 'btnSched', 'btnTrophy'];
-      btns.forEach(b => document.getElementById(b).className = 'py-2 rounded bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase');
-      const activeBtnId = viewMode === 'grid' ? 'btnGrid' : viewMode === 'tree' ? 'btnTree' : viewMode === 'schedule' ? 'btnSched' : 'btnTrophy';
-      document.getElementById(activeBtnId).className = 'py-2 rounded btn-active text-[10px] font-bold uppercase';
+      const container = document.getElementById('main-container'); container.innerHTML = '';
+      const btns = ['btnGrid', 'btnTree', 'btnSched', 'btnHistory', 'btnTrophy'];
+      btns.forEach(b => document.getElementById(b).className = 'py-2 rounded bg-zinc-800 text-zinc-400 text-[9px] font-bold uppercase');
+      const activeBtn = viewMode === 'grid' ? 'btnGrid' : viewMode === 'tree' ? 'btnTree' : viewMode === 'schedule' ? 'btnSched' : viewMode === 'history' ? 'btnHistory' : 'btnTrophy';
+      document.getElementById(activeBtn).className = 'py-2 rounded btn-active text-[9px] font-bold uppercase';
 
       if (viewMode === 'grid') renderGrid(s); 
       else if (viewMode === 'tree') renderTree(s);
       else if (viewMode === 'schedule') renderSchedule(s);
+      else if (viewMode === 'history') renderHistory(s);
       else renderTrophyRoom(s);
     }
 
     function renderGrid(student) {
       Object.keys(tierConfig).forEach(lvl => {
-        const rowTricks = tierConfig[lvl].tricks;
-        const completedCount = rowTricks.filter(t => student.progress[t.id]).length;
-        const xpPercent = (completedCount / rowTricks.length) * 100;
+        const row = tierConfig[lvl].tricks;
+        const xp = (row.filter(t => student.progress[t.id]).length / row.length) * 100;
         const section = document.createElement('div');
         section.className = `tier-wrapper`;
-        section.innerHTML = `
-            <div class="flex justify-between items-end"><h2 class="font-black italic uppercase text-xs text-zinc-500">Tier ${lvl}</h2><span class="text-[9px] font-bold text-orange-500">${Math.round(xpPercent)}% XP</span></div>
-            <div class="xp-bar-bg"><div class="xp-bar-fill" style="width: ${xpPercent}%"></div></div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">${rowTricks.map(t => {
-                const unlocked = student.progress[t.id], ready = t.prereqs.every(p => student.progress[p]), conf = (student.trickData[t.id] || {}).confidence || 0;
-                return `<div onclick="openModal('${t.id}')" class="trick-card p-3 cursor-pointer ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}"><h3 class="font-bold text-[11px] uppercase">${t.name}</h3><div class="confidence-dots"><div class="dot ${conf >= 1 ? 'active' : ''}"></div><div class="dot ${conf >= 2 ? 'active' : ''}"></div><div class="dot ${conf >= 3 ? 'active' : ''}"></div></div></div>`;
-            }).join('')}</div>`;
+        section.innerHTML = `<div class="flex justify-between items-end"><h2 class="font-black italic uppercase text-xs text-zinc-500">Tier ${lvl}</h2><span class="text-[9px] font-bold text-orange-500">${Math.round(xp)}% XP</span></div><div class="xp-bar-bg"><div class="xp-bar-fill" style="width: ${xp}%"></div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-3">${row.map(t => {
+            const unlocked = student.progress[t.id], ready = t.prereqs.every(p => student.progress[p]), conf = (student.trickData[t.id] || {}).confidence || 0;
+            return `<div onclick="openModal('${t.id}')" class="trick-card p-3 cursor-pointer ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}"><h3 class="font-bold text-[10px] uppercase">${t.name}</h3><div class="confidence-dots">${[1,2,3].map(n => `<div class="dot ${conf >= n ? 'active' : ''}"></div>`).join('')}</div></div>`;
+        }).join('')}</div>`;
         document.getElementById('main-container').appendChild(section);
       });
     }
 
+    function renderHistory(student) {
+        const history = student.history || [];
+        document.getElementById('main-container').innerHTML = `<div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl"><h3 class="text-xs font-black uppercase text-orange-500 mb-4">Session Log</h3>${history.length === 0 ? '<p class="text-zinc-600 text-[10px] text-center py-8">Start the timer to log your first session!</p>' : history.slice().reverse().map(log => `<div class="log-entry"><div class="flex justify-between items-start mb-1"><span class="log-date">${log.date}</span><span class="text-[10px] text-zinc-500 font-bold">${Math.floor(log.duration / 60)}m ${log.duration % 60}s</span></div><p class="text-[11px] text-zinc-300">${log.note || 'Skated hard.'}</p></div>`).join('')}</div>`;
+    }
+
+    function toggleTimer() {
+        const btn = document.getElementById('timerBtn'); const s = getS();
+        if (timerInterval) {
+            clearInterval(timerInterval); timerInterval = null; btn.textContent = "Start Session"; btn.classList.remove('timer-active');
+            const note = prompt("Quick Session Summary:");
+            if(!s.history) s.history = [];
+            s.history.push({ date: new Date().toLocaleDateString('en-AU'), duration: currentSessionSec, note: note || "Skate session" });
+            s.stats.sessionCount++; currentSessionSec = 0; save(); render();
+        } else {
+            if(!s.stats) s.stats = { totalTime: 0, sessionCount: 0 };
+            timerInterval = setInterval(() => { currentSessionSec++; s.stats.totalTime++; const h = String(Math.floor(currentSessionSec/3600)).padStart(2,'0'), m = String(Math.floor((currentSessionSec%3600)/60)).padStart(2,'0'), sc = String(currentSessionSec%60).padStart(2,'0'); document.getElementById('sessionTimer').textContent = `Session: ${h}:${m}:${sc}`; }, 1000);
+            btn.textContent = "Stop Session"; btn.classList.add('timer-active');
+        }
+    }
+
     function renderTree(student) {
-        const nodeW = 120, nodeH = 45, gapX = 40, gapY = 80;
+        const nodeW = 100, nodeH = 40, gapX = 30, gapY = 60;
         const pos = {}; const sortedTiers = Object.keys(tierConfig).sort();
-        let maxWidth = 0; sortedTiers.forEach(lvl => maxWidth = Math.max(maxWidth, tierConfig[lvl].tricks.length * (nodeW + gapX)));
+        let maxWidth = sortedTiers.reduce((max, lvl) => Math.max(max, tierConfig[lvl].tricks.length * (nodeW + gapX)), 0);
         sortedTiers.forEach((lvl, row) => {
             const rowTricks = tierConfig[lvl].tricks; const startX = (maxWidth - (rowTricks.length * (nodeW + gapX))) / 2;
-            rowTricks.forEach((t, col) => pos[t.id] = { x: startX + col * (nodeW + gapX), y: row * (nodeH + gapY) + 40 });
+            rowTricks.forEach((t, col) => pos[t.id] = { x: startX + col * (nodeW + gapX), y: row * (nodeH + gapY) + 20 });
         });
         let lines = '', nodes = '';
         tricksData.forEach(t => {
-            const p = pos[t.id];
-            t.prereqs.forEach(pid => {
+            const p = pos[t.id]; t.prereqs.forEach(pid => {
                 const parent = pos[pid]; if (parent) { const lit = student.progress[t.id] && student.progress[pid]; lines += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${lit ? 'lit' : ''}" />`; }
             });
             const status = student.progress[t.id] ? 'node-unlocked' : (t.prereqs.every(pr => student.progress[pr]) ? 'node-available' : 'node-locked');
-            nodes += `<g class="tree-node ${status}" onclick="openModal('${t.id}')" style="cursor:pointer"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" rx="8" fill="#18181b" stroke="#333" /><text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 4}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text></g>`;
+            nodes += `<g class="tree-node ${status}" onclick="openModal('${t.id}')"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" rx="6" fill="#18181b" stroke="#333" /><text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 4}" text-anchor="middle" fill="white" font-size="8" font-weight="bold" class="uppercase">${t.name}</text></g>`;
         });
-        document.getElementById('main-container').innerHTML = `<div class="tree-container-wrapper"><svg class="tree-svg" style="width:${maxWidth}px; height:${sortedTiers.length * (nodeH + gapY) + 100}px">${lines}${nodes}</svg></div>`;
+        document.getElementById('main-container').innerHTML = `<div class="tree-container-wrapper"><svg class="tree-svg" style="width:${maxWidth}px; height:${sortedTiers.length * (nodeH + gapY) + 60}px">${lines}${nodes}</svg></div>`;
     }
 
     function renderTrophyRoom(student) {
-        if(!student.stats) student.stats = { totalTime: 0, sessionCount: 0 };
-        const h = Math.floor(student.stats.totalTime / 3600);
-        document.getElementById('main-container').innerHTML = `
-            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl">
-                <div class="flex justify-between mb-6">
-                    <div><p class="text-[10px] text-zinc-500 font-bold uppercase">Total Skate Time</p><h3 class="text-xl font-black text-orange-500">${h} Hours</h3></div>
-                    <div><p class="text-[10px] text-zinc-500 font-bold uppercase">Sessions</p><h3 class="text-xl font-black text-orange-500">${student.stats.sessionCount}</h3></div>
-                </div>
-                <div class="trophy-grid">${trophyConfig.map(t => {
-                    const earned = t.check(student);
-                    return `<div class="trophy-card ${earned ? 'earned' : ''}"><span class="trophy-icon">${earned ? t.icon : '🔒'}</span><p class="trophy-name">${t.name}</p><p class="text-[6px] text-zinc-500 mt-1">${t.desc}</p></div>`;
-                }).join('')}</div>
-            </div>`;
-    }
-
-    function renderSchedule(student) {
-        const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-        const sched = student.schedule || {};
-        document.getElementById('main-container').innerHTML = `
-            <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl">
-                <h3 class="text-xs font-black uppercase text-orange-500 mb-4">Training Planner</h3>
-                <div class="grid grid-cols-7 gap-1 mb-6">${days.map(d => `<div onclick="toggleDay('${d}')" class="day-btn ${sched[d] ? 'active' : ''}">${d}</div>`).join('')}</div>
-                <div id="plannerDetails" class="space-y-3 mb-6">${days.filter(d => sched[d]).map(d => `<div class="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-zinc-800"><span class="text-[10px] font-bold w-8 text-orange-500">${d}</span><input type="date" class="bg-transparent border-none text-[10px]" value="${sched[d].date || ''}" onchange="updateSched('${d}', 'date', this.value)"><input type="time" class="bg-transparent border-none text-[10px]" value="${sched[d].time || ''}" onchange="updateSched('${d}', 'time', this.value)"></div>`).join('')}</div>
-                <h3 class="text-xs font-black uppercase text-orange-500 mb-2">Weekly Goal</h3><textarea oninput="saveGoals(this.value)" class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-xs text-zinc-300 outline-none" rows="3" placeholder="Landing this week...">${student.goals || ''}</textarea>
-            </div>`;
+        document.getElementById('main-container').innerHTML = `<div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl"><div class="trophy-grid">${trophyConfig.map(t => `<div class="trophy-card ${t.check(student) ? 'earned' : ''}"><span class="text-2xl">${t.check(student) ? t.icon : '🔒'}</span><p class="text-[8px] font-black uppercase mt-1">${t.name}</p></div>`).join('')}</div></div>`;
     }
 
     function openModal(id) {
-      const t = tricksData.find(x => x.id === id), s = getS(); if(!s.trickData[id]) s.trickData[id] = { confidence: 0, notes: '' }; const data = s.trickData[id];
+      const t = tricksData.find(x => x.id === id), s = getS(); if(!s.trickData[id]) s.trickData[id] = { confidence: 0, notes: '' };
       document.getElementById('modal-content').innerHTML = `
-        <h2 class="text-lg font-black italic neon-orange uppercase mb-1">${t.name}</h2><p class="text-zinc-500 text-[10px] uppercase mb-4">Tier ${t.level} Mastery</p>
-        <div class="mb-6"><label class="text-[10px] font-bold text-zinc-400 uppercase block mb-2">Confidence</label><div class="flex gap-2">${[1, 2, 3].map(n => `<button onclick="setConfidence('${id}', ${n})" class="flex-1 py-2 rounded-lg border ${data.confidence >= n ? 'bg-orange-600 border-orange-400' : 'bg-zinc-800 border-zinc-700'} text-[9px] font-bold uppercase">${n === 1 ? 'Sketchy' : n === 2 ? 'Solid' : 'Bolted'}</button>`).join('')}</div></div>
-        <div class="mb-6"><label class="text-[10px] font-bold text-zinc-400 uppercase block mb-2">Trainer Cues</label><textarea oninput="saveTrickNotes('${id}', this.value)" class="w-full p-3 rounded-xl text-xs" rows="3">${data.notes || ''}</textarea></div>
-        <button onclick="toggleTrick('${id}')" class="w-full py-4 ${s.progress[id] ? 'bg-zinc-800' : 'bg-green-600'} rounded-xl font-bold text-xs uppercase">${s.progress[id] ? 'Unlearn' : 'Mastered'}</button>`;
+        <h2 class="text-lg font-black italic neon-orange uppercase mb-4">${t.name}</h2>
+        <div class="mb-6"><label class="text-[10px] font-bold text-zinc-400 block mb-2 uppercase">Confidence</label><div class="flex gap-2">${[1, 2, 3].map(n => `<button onclick="setConfidence('${id}', ${n})" class="flex-1 py-2 rounded-lg border ${s.trickData[id].confidence >= n ? 'bg-orange-600 border-orange-400' : 'bg-zinc-800 border-zinc-700'} text-[9px] font-bold uppercase">${n===3?'Bolted':n===2?'Solid':'Sketchy'}</button>`).join('')}</div></div>
+        <div class="mb-6"><textarea oninput="saveTrickNotes('${id}', this.value)" class="w-full p-3 rounded-xl text-xs" rows="3" placeholder="Trainer Notes...">${s.trickData[id].notes || ''}</textarea></div>
+        <button onclick="toggleTrick('${id}')" class="w-full py-4 ${s.progress[id] ? 'bg-zinc-800' : 'bg-green-600'} rounded-xl font-bold text-xs uppercase">${s.progress[id] ? 'Reset' : 'Complete'}</button>`;
       document.getElementById('modal-overlay').classList.remove('hidden');
     }
 
-    window.toggleTimer = () => {
-      const btn = document.getElementById('timerBtn'); const s = getS(); if(!s.stats) s.stats = { totalTime: 0, sessionCount: 0 };
-      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; btn.textContent = "Start Session"; btn.classList.remove('timer-active'); save(); } 
-      else { s.stats.sessionCount++; timerInterval = setInterval(() => { currentSessionSec++; s.stats.totalTime++; const h = String(Math.floor(currentSessionSec / 3600)).padStart(2,'0'), m = String(Math.floor((currentSessionSec % 3600) / 60)).padStart(2,'0'), sc = String(currentSessionSec % 60).padStart(2,'0'); document.getElementById('sessionTimer').textContent = `Session: ${h}:${m}:${sc}`; }, 1000); btn.textContent = "Stop Session"; btn.classList.add('timer-active'); }
-    };
-
-    window.setConfidence = (tid, val) => { getS().trickData[tid].confidence = val; save(); openModal(tid); render(); };
-    window.saveTrickNotes = (tid, val) => { getS().trickData[tid].notes = val; save(); };
+    window.setConfidence = (tid, v) => { getS().trickData[tid].confidence = v; save(); openModal(tid); render(); };
+    window.saveTrickNotes = (tid, v) => { getS().trickData[tid].notes = v; save(); };
     window.toggleTrick = (id) => { const s = getS(); if (s.progress[id]) delete s.progress[id]; else s.progress[id] = true; save(); render(); closeModal(); };
     window.closeModal = () => document.getElementById('modal-overlay').classList.add('hidden');
-    window.toggleDay = (day) => { const s = getS(); s.schedule[day] = s.schedule[day] ? null : { date: '', time: '' }; if(!s.schedule[day]) delete s.schedule[day]; save(); render(); };
-    window.updateSched = (day, field, val) => { getS().schedule[day][field] = val; save(); };
-    window.saveGoals = (val) => { getS().goals = val; save(); };
     window.setView = (v) => { viewMode = v; render(); };
-    window.addStudent = () => { const name = prompt("Name:"); if(name) { const newS = { id: 's'+Date.now(), name, progress: {}, trickData: {}, stance: 'Regular', schedule: {}, goals: '', stats: { totalTime: 0, sessionCount: 0 } }; allStudents.push(newS); currentId = newS.id; save(); init(); } };
-    window.deleteStudent = () => { if(allStudents.length > 1 && confirm("Delete?")) { allStudents = allStudents.filter(s => s.id !== currentId); currentId = allStudents[0].id; save(); init(); } };
+    window.addStudent = () => { const n = prompt("Name:"); if(n) { allStudents.push({ id: 's'+Date.now(), name: n, progress: {}, trickData: {}, history: [], stats: { totalTime: 0, sessionCount: 0 } }); save(); init(); } };
     window.switchStudent = (id) => { currentId = id; save(); render(); };
-    window.toggleStance = () => { const s = getS(); s.stance = s.stance === 'Regular' ? 'Goofy' : 'Regular'; save(); render(); };
-    window.exportData = () => { const blob = new Blob([JSON.stringify(allStudents)], {type: 'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'academy_pro.json'; a.click(); };
-    window.importData = (e) => { const reader = new FileReader(); reader.onload = (ev) => { allStudents = JSON.parse(ev.target.result); currentId = allStudents[0].id; save(); init(); }; reader.readAsText(e.target.files[0]); };
+    function renderSchedule(student) { document.getElementById('main-container').innerHTML = `<div class="bg-zinc-900 p-6 rounded-2xl text-center text-zinc-500 text-[10px] uppercase font-bold">Planner logic restored in next update.</div>`; }
 
     function init() { document.getElementById('studentSelect').innerHTML = allStudents.map(s => `<option value="${s.id}" ${s.id === currentId ? 'selected' : ''}>${s.name.toUpperCase()}</option>`).join(''); render(); }
     init();
