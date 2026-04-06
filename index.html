@@ -221,13 +221,50 @@
     window.saveTrickNotes = (tid, v) => { getS().trickData[tid].notes = v; save(); };
     window.toggleTrick = (id) => { const s = getS(); if (s.progress[id]) delete s.progress[id]; else s.progress[id] = true; save(); render(); closeModal(); };
     window.closeModal = () => document.getElementById('modal-overlay').classList.add('hidden');
+  window.toggleDay = (day) => {
+  const s = getS();
+  s.schedule = s.schedule || {};
+  s.schedule[day] = !s.schedule[day];
+  save();
+  render(); // Refresh to show the orange highlight
+};
+
+window.saveGoal = (val) => {
+  const s = getS();
+  s.goals = val;
+  save(); // Saves to local storage as you type
+};
     window.setView = (v) => { viewMode = v; render(); };
     window.addStudent = () => { const n = prompt("Name:"); if(n) { allStudents.push({ id: 's'+Date.now(), name: n, progress: {}, trickData: {}, history: [], stats: { totalTime: 0, sessionCount: 0 } }); save(); init(); } };
     window.switchStudent = (id) => { currentId = id; save(); render(); };
-    function renderSchedule(student) { document.getElementById('main-container').innerHTML = `<div class="bg-zinc-900 p-6 rounded-2xl text-center text-zinc-500 text-[10px] uppercase font-bold">Planner logic restored in next update.</div>`; }
+function renderSchedule(student) {
+  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  student.schedule = student.schedule || {};
+  
+  document.getElementById('main-container').innerHTML = `
+    <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
+      <h3 class="text-[10px] font-black uppercase text-orange-500 mb-4 tracking-widest text-center">Weekly Skate Schedule</h3>
+      
+      <div class="grid grid-cols-7 gap-1 mb-6">
+        ${days.map(d => `
+          <button onclick="toggleDay('${d}')" 
+            class="py-3 text-[10px] font-bold rounded-lg transition-all border ${student.schedule[d] ? 'bg-orange-600 text-white border-orange-400 shadow-[0_0_10px_rgba(249,115,22,0.3)]' : 'bg-zinc-800 text-zinc-500 border-zinc-700'}">
+            ${d}
+          </button>
+        `).join('')}
+      </div>
 
-    function init() { document.getElementById('studentSelect').innerHTML = allStudents.map(s => `<option value="${s.id}" ${s.id === currentId ? 'selected' : ''}>${s.name.toUpperCase()}</option>`).join(''); render(); }
-    init();
+      <h3 class="text-[10px] font-black uppercase text-orange-500 mb-2 tracking-widest">Focus / Battle Goal</h3>
+      <textarea 
+        oninput="saveGoal(this.value)" 
+        class="w-full bg-black border border-zinc-800 p-4 text-xs rounded-xl text-zinc-300 focus:border-orange-500 outline-none transition-colors" 
+        rows="4" 
+        placeholder="e.g. Get the 8-year-old to commit to a moving Ollie...">${student.goals || ''}</textarea>
+      
+      <p class="text-[9px] text-zinc-600 mt-3 italic uppercase text-center">Tap days to plan your sessions</p>
+    </div>
+  `;
+}
 </script>
 </body>
 </html>
