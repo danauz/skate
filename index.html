@@ -25,11 +25,11 @@
     .sticker-slot { width: 50px; height: 50px; background: #111; border: 2px dashed #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; filter: grayscale(1); opacity: 0.3; }
     .sticker-slot.earned { filter: grayscale(0); opacity: 1; border-style: solid; border-color: var(--orange); box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
     .timer-active { animation: pulse 2s infinite; background-color: #ef4444 !important; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+    
+    .day-btn { background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+    .day-btn.active { background: var(--orange); border-color: #fff; color: #000; }
 
-    /* Custom Scrollbar for the Notes */
-    .trainer-notes::-webkit-scrollbar { width: 4px; }
-    .trainer-notes::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
   </style>
 </head>
 <body class="pb-24">
@@ -57,30 +57,16 @@
       </div>
     </header>
 
-    <div class="mb-6">
+    <div class="mb-6" id="notes-area">
       <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3">
-        <div class="flex justify-between items-center mb-2">
-          <label class="text-[9px] font-black uppercase tracking-widest text-zinc-500">Trainer's Log & Student Notes</label>
-          <span class="text-[8px] text-zinc-600 italic">Auto-saves on type...</span>
-        </div>
-        <textarea id="trainerNotes" oninput="saveNotes(this.value)" 
-          class="trainer-notes w-full bg-black/40 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-300 placeholder-zinc-700 outline-none focus:border-orange-900/50 transition-colors" 
-          rows="3" placeholder="Write feedback, goals, or areas to improve for this skater..."></textarea>
+        <textarea id="trainerNotes" oninput="saveNotes(this.value)" class="w-full bg-black/40 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-300 outline-none" rows="2" placeholder="Trainer feedback..."></textarea>
       </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-4 mb-6">
-      <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-        <div class="text-zinc-500 text-[10px] font-bold uppercase">Mastered</div>
-        <div id="statsProgress" class="text-2xl font-black neon-orange">0/0</div>
-      </div>
-      <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-        <div class="text-zinc-500 text-[10px] font-bold uppercase">View Mode</div>
-        <div class="flex gap-2 mt-1">
-          <button id="btnGrid" onclick="setView('grid')" class="flex-1 py-1 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-bold transition-all">TIERS</button>
-          <button id="btnTree" onclick="setView('tree')" class="flex-1 py-1 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-bold transition-all">TREE</button>
-        </div>
-      </div>
+    <div class="grid grid-cols-3 gap-2 mb-6">
+      <button id="btnGrid" onclick="setView('grid')" class="py-2 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-bold transition-all uppercase">Tiers</button>
+      <button id="btnTree" onclick="setView('tree')" class="py-2 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-bold transition-all uppercase">Tree</button>
+      <button id="btnSched" onclick="setView('schedule')" class="py-2 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-bold transition-all uppercase">Schedule</button>
     </div>
 
     <div id="main-container"></div>
@@ -142,12 +128,12 @@
     };
 
     const tricksData = Object.keys(tierConfig).flatMap(lvl => tierConfig[lvl].tricks.map(t => ({ ...t, level: parseInt(lvl) })));
-    let allStudents = JSON.parse(localStorage.getItem('skate_v7')) || [{ id: "s1", name: "New Skater", progress: {}, videos: {}, stance: 'Regular', notes: '' }];
-    let currentId = localStorage.getItem('skate_id_v7') || allStudents[0].id;
+    let allStudents = JSON.parse(localStorage.getItem('skate_v8')) || [{ id: "s1", name: "New Skater", progress: {}, videos: {}, stance: 'Regular', notes: '', schedule: [], goals: '' }];
+    let currentId = localStorage.getItem('skate_id_v8') || allStudents[0].id;
     let viewMode = 'grid', timerInterval = null, totalSec = 0;
 
     function getS() { return allStudents.find(s => s.id === currentId) || allStudents[0]; }
-    function save() { localStorage.setItem('skate_v7', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v7', currentId); }
+    function save() { localStorage.setItem('skate_v8', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v8', currentId); }
 
     function render() {
       const s = getS();
@@ -155,31 +141,32 @@
       document.getElementById('stanceBtn').textContent = s.stance || 'Regular';
       document.getElementById('trainerNotes').value = s.notes || '';
       
-      document.getElementById('btnGrid').className = viewMode === 'grid' ? 'flex-1 py-1 rounded text-[10px] font-bold transition-all btn-active' : 'flex-1 py-1 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold transition-all';
-      document.getElementById('btnTree').className = viewMode === 'tree' ? 'flex-1 py-1 rounded text-[10px] font-bold transition-all btn-active' : 'flex-1 py-1 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold transition-all';
+      document.getElementById('btnGrid').className = viewMode === 'grid' ? 'py-2 rounded text-[10px] font-bold transition-all btn-active' : 'py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold transition-all';
+      document.getElementById('btnTree').className = viewMode === 'tree' ? 'py-2 rounded text-[10px] font-bold transition-all btn-active' : 'py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold transition-all';
+      document.getElementById('btnSched').className = viewMode === 'schedule' ? 'py-2 rounded text-[10px] font-bold transition-all btn-active' : 'py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold transition-all';
 
       const container = document.getElementById('main-container');
       container.innerHTML = '';
-      if (viewMode === 'grid') renderGrid(s); else renderTree(s);
+      if (viewMode === 'grid') renderGrid(s); 
+      else if (viewMode === 'tree') renderTree(s);
+      else renderSchedule(s);
       updateBadges(s);
     }
 
     function renderGrid(student) {
-      const container = document.getElementById('main-container');
       Object.keys(tierConfig).forEach(lvl => {
         const section = document.createElement('div');
         section.className = `tier-wrapper`;
         section.innerHTML = `<h2 class="font-black italic uppercase text-xs text-zinc-500 mb-4">${tierConfig[lvl].name}</h2><div class="grid grid-cols-2 md:grid-cols-4 gap-3">${tierConfig[lvl].tricks.map(t => {
             const unlocked = student.progress[t.id];
             const ready = t.prereqs.every(p => student.progress[p]);
-            return `<div onclick="openModal('${t.id}')" class="trick-card p-3 cursor-pointer ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}"><h3 class="font-bold text-[11px] uppercase">${t.name}</h3>${student.videos[t.id] ? '<span class="text-[8px] text-orange-500 font-bold">🎥 VIDEO</span>' : ''}</div>`;
+            return `<div onclick="openModal('${t.id}')" class="trick-card p-3 cursor-pointer ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}"><h3 class="font-bold text-[11px] uppercase">${t.name}</h3></div>`;
         }).join('')}</div>`;
-        container.appendChild(section);
+        document.getElementById('main-container').appendChild(section);
       });
     }
 
     function renderTree(student) {
-        const container = document.getElementById('main-container');
         const nodeW = 120, nodeH = 45, gapX = 40, gapY = 80;
         const pos = {};
         const sortedTiers = Object.keys(tierConfig).sort();
@@ -203,29 +190,45 @@
             const status = student.progress[t.id] ? 'node-unlocked' : (t.prereqs.every(pr => student.progress[pr]) ? 'node-available' : '');
             nodes += `<g class="tree-node ${status}" onclick="openModal('${t.id}')"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" rx="8" fill="#18181b" stroke="#333" stroke-width="2"/><text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 4}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text></g>`;
         });
-        container.innerHTML = `<div class="tree-container-wrapper"><svg class="tree-svg" style="width:${maxWidth}px; height:${sortedTiers.length * (nodeH + gapY) + 100}px">${lines}${nodes}</svg></div>`;
+        document.getElementById('main-container').innerHTML = `<div class="tree-container-wrapper"><svg class="tree-svg" style="width:${maxWidth}px; height:${sortedTiers.length * (nodeH + gapY) + 100}px">${lines}${nodes}</svg></div>`;
     }
 
+    function renderSchedule(student) {
+        const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        const schedData = student.schedule || [];
+        document.getElementById('main-container').innerHTML = `
+            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl">
+                <h3 class="text-xs font-black uppercase tracking-widest text-orange-500 mb-6">Weekly Training Days</h3>
+                <div class="grid grid-cols-7 gap-2 mb-8">
+                    ${days.map(d => `<div onclick="toggleDay('${d}')" class="day-btn ${schedData.includes(d) ? 'active' : ''}">${d}</div>`).join('')}
+                </div>
+                <h3 class="text-xs font-black uppercase tracking-widest text-orange-500 mb-4">Current Session Goals</h3>
+                <textarea oninput="saveGoals(this.value)" class="w-full bg-black border border-zinc-800 rounded-xl p-4 text-sm text-zinc-300 outline-none" rows="5" placeholder="Example: Practice dropping in 10 times...">${student.goals || ''}</textarea>
+            </div>`;
+    }
+
+    window.toggleDay = (day) => { 
+        const s = getS(); if(!s.schedule) s.schedule = [];
+        if(s.schedule.includes(day)) s.schedule = s.schedule.filter(d => d !== day);
+        else s.schedule.push(day);
+        save(); render();
+    };
+    window.saveGoals = (val) => { getS().goals = val; save(); };
+    window.saveNotes = (val) => { getS().notes = val; save(); };
+    window.setView = (v) => { viewMode = v; render(); };
+    window.toggleTrick = (id) => { const s = getS(); if (s.progress[id]) delete s.progress[id]; else s.progress[id] = true; save(); render(); closeModal(); };
+    window.closeModal = () => document.getElementById('modal-overlay').classList.add('hidden');
+    
     function openModal(id) {
       const t = tricksData.find(x => x.id === id), s = getS();
       document.getElementById('modal-content').innerHTML = `
         <h2 class="text-lg font-black italic neon-orange uppercase mb-2">${t.name}</h2>
-        <p class="text-zinc-400 text-xs mb-4">${t.description}</p>
-        <input type="text" id="vUrl" value="${s.videos[id] || ''}" placeholder="YouTube/Instagram Link" class="w-full bg-black border border-zinc-800 p-2 text-xs rounded mb-4 text-orange-500 outline-none">
-        <div class="flex gap-2">
-          <button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-orange-600 rounded-lg font-bold text-xs uppercase">${s.progress[id] ? 'Unlearn' : 'Mastered'}</button>
-          <button onclick="saveVid('${id}')" class="px-4 py-3 bg-zinc-700 rounded-lg font-bold text-xs uppercase">Save</button>
-        </div>`;
+        <p class="text-zinc-400 text-xs mb-6">${t.description}</p>
+        <button onclick="toggleTrick('${id}')" class="w-full py-4 bg-orange-600 rounded-xl font-bold text-xs uppercase">${s.progress[id] ? 'Unlearn' : 'Mastered'}</button>`;
       document.getElementById('modal-overlay').classList.remove('hidden');
     }
 
-    window.saveNotes = (val) => { getS().notes = val; save(); };
-    window.toggleTrick = (id) => { const s = getS(); if (s.progress[id]) delete s.progress[id]; else s.progress[id] = true; save(); render(); closeModal(); };
-    window.saveVid = (id) => { getS().videos[id] = document.getElementById('vUrl').value; save(); render(); closeModal(); };
-    window.closeModal = () => document.getElementById('modal-overlay').classList.add('hidden');
-    window.setView = (v) => { viewMode = v; render(); };
-    
-    window.addStudent = () => { const name = prompt("Skater Name:"); if(name) { const newS = { id: 's'+Date.now(), name, progress: {}, videos: {}, stance: 'Regular', notes: '' }; allStudents.push(newS); currentId = newS.id; save(); init(); } };
+    window.addStudent = () => { const name = prompt("Skater Name:"); if(name) { const newS = { id: 's'+Date.now(), name, progress: {}, videos: {}, stance: 'Regular', notes: '', schedule: [], goals: '' }; allStudents.push(newS); currentId = newS.id; save(); init(); } };
     window.deleteStudent = () => { if(allStudents.length > 1 && confirm("Delete skater?")) { allStudents = allStudents.filter(s => s.id !== currentId); currentId = allStudents[0].id; save(); init(); } };
     window.switchStudent = (id) => { currentId = id; save(); render(); };
     window.toggleStance = () => { const s = getS(); s.stance = s.stance === 'Regular' ? 'Goofy' : 'Regular'; save(); render(); };
