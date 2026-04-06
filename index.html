@@ -207,13 +207,13 @@
 function renderGrid(student) {
         const container = document.getElementById('main-container');
         
-        // 1. FIND AVAILABLE TRICKS (Unlocked but not yet Mastered)
+        // 1. FIND AVAILABLE TRICKS
         const available = tricksData.filter(t => !student.progress[t.id] && t.pre.every(p => student.progress[p]));
         
-        // 2. SEEDED RANDOM LOGIC (Keep same 3 tricks all day)
+        // 2. SEEDED RANDOM LOGIC
         const today = new Date().toDateString();
         let seed = 0;
-        const seedStr = today + student.id; // Unique to the day and the specific skater
+        const seedStr = today + student.id; 
         for (let i = 0; i < seedStr.length; i++) seed = ((seed << 5) - seed) + seedStr.charCodeAt(i);
         
         const getSeededRandom = () => {
@@ -228,20 +228,23 @@ function renderGrid(student) {
             challengeTricks.push(pool.splice(index, 1)[0]);
         }
 
-        // 3. RENDER CHALLENGE UI
+        // 3. RENDER CHALLENGE UI (Toned Down Colors)
         let challengeHTML = `
-            <div class="bg-gradient-to-br from-orange-600 to-red-600 p-4 rounded-2xl mb-8 border border-orange-400 shadow-lg shadow-orange-900/20">
+            <div class="bg-zinc-900 p-4 rounded-2xl mb-8 border border-orange-900/50 shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-orange-900/10 blur-3xl -z-10"></div>
+                
                 <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-orange-100">Today's Team Challenge</h2>
-                    <span class="text-[7px] font-bold bg-black/40 px-2 py-0.5 rounded text-white italic">DEMENTED</span>
+                    <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-orange-700">Daily Challenge</h2>
+                    <span class="text-[7px] font-bold bg-orange-950/40 px-2 py-0.5 rounded text-orange-600/80 border border-orange-900/30 italic uppercase">Demented DU</span>
                 </div>
+                
                 <div class="grid grid-cols-3 gap-2">
                     ${challengeTricks.length > 0 ? challengeTricks.map(t => `
-                        <div onclick="openModal('${t.id}')" class="bg-black/40 backdrop-blur-sm p-3 rounded-xl border border-white/10 text-center active:scale-95 transition-transform">
-                            <div class="text-[9px] font-black text-white uppercase mb-1 truncate">${t.name}</div>
-                            <div class="text-[7px] font-bold text-orange-300">STOMP IT</div>
+                        <div onclick="openModal('${t.id}')" class="bg-black/60 p-3 rounded-xl border border-zinc-800 text-center active:scale-95 transition-transform hover:border-orange-900/50">
+                            <div class="text-[9px] font-black text-zinc-300 uppercase mb-1 truncate">${t.name}</div>
+                            <div class="text-[7px] font-bold text-zinc-600 uppercase tracking-tighter">Mission</div>
                         </div>
-                    `).join('') : '<div class="col-span-3 text-[9px] text-orange-100 py-2 italic text-center font-bold">ALL TARGETS CLEARED! LEVEL UP TIERS.</div>'}
+                    `).join('') : '<div class="col-span-3 text-[9px] text-zinc-500 py-2 italic text-center font-bold">ALL TARGETS CLEARED</div>'}
                 </div>
             </div>
         `;
@@ -249,17 +252,17 @@ function renderGrid(student) {
         container.innerHTML = challengeHTML;
 
         // 4. RENDER REGULAR TIERS
-        Object.keys(tierConfig).forEach(lvl => {
-            const row = tierConfig[lvl].tricks;
-            const xp = (row.filter(t => student.progress[t.id]).length / row.length) * 100;
-            const section = document.createElement('div'); section.className = `tier-wrapper`;
-            section.innerHTML = `<div class="flex justify-between items-end"><h2 class="font-black italic uppercase text-xs text-zinc-500">Tier ${lvl}</h2><span class="text-[9px] font-bold text-orange-500">${Math.round(xp)}% XP</span></div><div class="xp-bar-bg"><div class="xp-bar-fill" style="width: ${xp}%"></div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-3">${row.map(t => {
-                const unlocked = student.progress[t.id], ready = t.pre.every(p => student.progress[p]), conf = (student.trickData[t.id] || {}).confidence || 0;
-                return `<div onclick="openModal('${t.id}')" class="trick-card p-3 ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}"><h3 class="font-bold text-[10px] uppercase">${t.name}</h3><div class="confidence-dots flex gap-1 mt-2">${[1,2,3].map(n => `<div class="dot ${conf >= n ? 'active' : ''}"></div>`).join('')}</div></div>`;
-            }).join('')}</div>`;
-            container.appendChild(section);
-        });
-    }
+        Object.keys(tierConfig).forEach(lvl => {
+            const row = tierConfig[lvl].tricks;
+            const xp = (row.filter(t => student.progress[t.id]).length / row.length) * 100;
+            const section = document.createElement('div'); section.className = `tier-wrapper`;
+            section.innerHTML = `<div class="flex justify-between items-end"><h2 class="font-black italic uppercase text-xs text-zinc-500">Tier ${lvl}</h2><span class="text-[9px] font-bold text-orange-800">${Math.round(xp)}% XP</span></div><div class="xp-bar-bg"><div class="xp-bar-fill" style="width: ${xp}%; background: #9a3412; box-shadow: none;"></div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-3">${row.map(t => {
+                const unlocked = student.progress[t.id], ready = t.pre.every(p => student.progress[p]), conf = (student.trickData[t.id] || {}).confidence || 0;
+                return `<div onclick="openModal('${t.id}')" class="trick-card p-3 ${unlocked ? 'unlocked' : (ready ? 'available' : 'locked')}"><h3 class="font-bold text-[10px] uppercase">${t.name}</h3><div class="confidence-dots flex gap-1 mt-2">${[1,2,3].map(n => `<div class="dot ${conf >= n ? 'active' : ''}"></div>`).join('')}</div></div>`;
+            }).join('')}</div>`;
+            container.appendChild(section);
+        });
+    }
 
     window.toggleTimer = () => {
         const btn = document.getElementById('timerBtn'); const s = getS();
