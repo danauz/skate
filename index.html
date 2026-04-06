@@ -26,11 +26,15 @@
     .sticker-slot.earned { filter: grayscale(0); opacity: 1; border-style: solid; border-color: var(--orange); box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
     .timer-active { animation: pulse 2s infinite; background-color: #ef4444 !important; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+    /* Custom Scrollbar for the Notes */
+    .trainer-notes::-webkit-scrollbar { width: 4px; }
+    .trainer-notes::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
   </style>
 </head>
 <body class="pb-24">
   <div class="max-w-5xl mx-auto p-4">
-    <header class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 mb-6">
+    <header class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 mb-4">
       <div class="flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
           <h1 class="text-xl font-black italic uppercase tracking-tighter leading-none">Demented Academy</h1>
@@ -43,7 +47,7 @@
           <button onclick="deleteStudent()" class="bg-zinc-800 px-2 rounded border border-zinc-700 text-xs text-red-500">×</button>
         </div>
       </div>
-      <div class="mt-4 pt-4 border-t border-zinc-800 flex justify-between items-center">
+      <div class="mt-4 pt-4 border-t border-zinc-800 flex flex-wrap gap-2 justify-between items-center">
         <div class="flex gap-2">
             <button onclick="toggleStance()" id="stanceBtn" class="text-[10px] font-black uppercase bg-orange-600 px-3 py-1 rounded">Regular</button>
             <button onclick="exportData()" class="text-[10px] font-bold uppercase bg-zinc-800 px-3 py-1 rounded border border-zinc-700">Export</button>
@@ -52,6 +56,18 @@
         </div>
       </div>
     </header>
+
+    <div class="mb-6">
+      <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3">
+        <div class="flex justify-between items-center mb-2">
+          <label class="text-[9px] font-black uppercase tracking-widest text-zinc-500">Trainer's Log & Student Notes</label>
+          <span class="text-[8px] text-zinc-600 italic">Auto-saves on type...</span>
+        </div>
+        <textarea id="trainerNotes" oninput="saveNotes(this.value)" 
+          class="trainer-notes w-full bg-black/40 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-300 placeholder-zinc-700 outline-none focus:border-orange-900/50 transition-colors" 
+          rows="3" placeholder="Write feedback, goals, or areas to improve for this skater..."></textarea>
+      </div>
+    </div>
 
     <div class="grid grid-cols-2 gap-4 mb-6">
       <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
@@ -126,19 +142,19 @@
     };
 
     const tricksData = Object.keys(tierConfig).flatMap(lvl => tierConfig[lvl].tricks.map(t => ({ ...t, level: parseInt(lvl) })));
-    let allStudents = JSON.parse(localStorage.getItem('skate_v6')) || [{ id: "s1", name: "Skater 1", progress: {}, videos: {}, stance: 'Regular' }];
-    let currentId = localStorage.getItem('skate_id_v6') || allStudents[0].id;
+    let allStudents = JSON.parse(localStorage.getItem('skate_v7')) || [{ id: "s1", name: "New Skater", progress: {}, videos: {}, stance: 'Regular', notes: '' }];
+    let currentId = localStorage.getItem('skate_id_v7') || allStudents[0].id;
     let viewMode = 'grid', timerInterval = null, totalSec = 0;
 
     function getS() { return allStudents.find(s => s.id === currentId) || allStudents[0]; }
-    function save() { localStorage.setItem('skate_v6', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v6', currentId); }
+    function save() { localStorage.setItem('skate_v7', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v7', currentId); }
 
     function render() {
       const s = getS();
       document.getElementById('statsProgress').textContent = `${Object.keys(s.progress).length}/${tricksData.length}`;
       document.getElementById('stanceBtn').textContent = s.stance || 'Regular';
+      document.getElementById('trainerNotes').value = s.notes || '';
       
-      // Update Button Highlight
       document.getElementById('btnGrid').className = viewMode === 'grid' ? 'flex-1 py-1 rounded text-[10px] font-bold transition-all btn-active' : 'flex-1 py-1 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold transition-all';
       document.getElementById('btnTree').className = viewMode === 'tree' ? 'flex-1 py-1 rounded text-[10px] font-bold transition-all btn-active' : 'flex-1 py-1 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold transition-all';
 
@@ -203,12 +219,13 @@
       document.getElementById('modal-overlay').classList.remove('hidden');
     }
 
+    window.saveNotes = (val) => { getS().notes = val; save(); };
     window.toggleTrick = (id) => { const s = getS(); if (s.progress[id]) delete s.progress[id]; else s.progress[id] = true; save(); render(); closeModal(); };
     window.saveVid = (id) => { getS().videos[id] = document.getElementById('vUrl').value; save(); render(); closeModal(); };
     window.closeModal = () => document.getElementById('modal-overlay').classList.add('hidden');
     window.setView = (v) => { viewMode = v; render(); };
     
-    window.addStudent = () => { const name = prompt("Skater Name:"); if(name) { const newS = { id: 's'+Date.now(), name, progress: {}, videos: {}, stance: 'Regular' }; allStudents.push(newS); currentId = newS.id; save(); init(); } };
+    window.addStudent = () => { const name = prompt("Skater Name:"); if(name) { const newS = { id: 's'+Date.now(), name, progress: {}, videos: {}, stance: 'Regular', notes: '' }; allStudents.push(newS); currentId = newS.id; save(); init(); } };
     window.deleteStudent = () => { if(allStudents.length > 1 && confirm("Delete skater?")) { allStudents = allStudents.filter(s => s.id !== currentId); currentId = allStudents[0].id; save(); init(); } };
     window.switchStudent = (id) => { currentId = id; save(); render(); };
     window.toggleStance = () => { const s = getS(); s.stance = s.stance === 'Regular' ? 'Goofy' : 'Regular'; save(); render(); };
