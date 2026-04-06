@@ -88,7 +88,7 @@
     /* ==========================================
        TRICK REPOSITORY (TIER-BASED)
        ========================================== */
-    const tierConfig = {
+const tierConfig = {
       1: {
         name: "Fundamentals (Tier 1)",
         tricks: [
@@ -105,40 +105,37 @@
         name: "Basic (Tier 2)",
         tricks: [
           { id: "kickturn", name: "Kickturn", description: "Pivot turns on ramp/flat.", tips: "Point your front shoulder.", prereqs: ["push", "tictac"] },
-          { id: "running start", name: "Running Start", description: "Run and jump on.", tips: "Look where you want to go.", prereqs: ["push"] },
-          { id: "hippie jump", name: "Hippie Jump", description: "Jump and land on bolts.", tips: "Stay balanced over center.", prereqs: ["push", "falling"] },
-          { id: "ride switch", name: "Switch", description: "Non-natural stance.", tips: "Pretend you're starting over!", prereqs: ["push"] },
-          { id: "roll in", name: "Roll in", description: "Rolling into a ramp.", tips: "Commit weight forward!", prereqs: ["push"] },
-          { id: "drop-in", name: "Drop-In", description: "Entering from coping.", tips: "Slam those front wheels down!", prereqs: ["stop"] },
+          { id: "running_start", name: "Running Start", description: "Run and jump on.", tips: "Look where you want to go.", prereqs: ["push"] },
+          { id: "hippie_jump", name: "Hippie Jump", description: "Jump and land on bolts.", tips: "Stay balanced over center.", prereqs: ["push", "falling"] },
+          { id: "ride_switch", name: "Switch", description: "Non-natural stance.", tips: "Pretend you're starting over!", prereqs: ["push"] },
+          { id: "roll_in", name: "Roll in", description: "Rolling into a ramp.", tips: "Commit weight forward!", prereqs: ["push"] },
+          { id: "drop_in", name: "Drop-In", description: "Entering from coping.", tips: "Slam those front wheels down!", prereqs: ["stop"] },
           { id: "manual", name: "Manual", description: "2-wheel balance.", tips: "Use arms for balance.", prereqs: ["tictac"] },
           { id: "ollie", name: "Ollie", description: "Foundation jump.", tips: "Pop tail hard, slide foot up.", prereqs: ["push", "tictac", "stop"] },
-          { id: "shuvit", name: "Shuvit", description: "180 board spin.", tips: "Scoop the tail back.", prereqs: ["push"] },
-          { id: "nollie shuvit", name: "Nollie Shuvit", description: "Front-foot scoop.", tips: "Pop the nose.", prereqs: ["shuvit"] }
+          { id: "shuvit", name: "Shuvit", description: "180 board spin.", tips: "Scoop the tail back.", prereqs: ["push"] }
         ]
       },
       3: {
         name: "Intermediate (Tier 3)",
         tricks: [
           { id: "caveman", name: "Caveman", description: "Jump onto board.", tips: "Hold nose, jump, and place.", prereqs: ["stance"] },
-          { id: "pop shuvit", name: "Pop shuvit", description: "180 board spin with a pop.", tips: "pop an shuv", prereqs: ["shuvit"] },
-          { id: "rock to fakie", name: "Rock to Fakie", description: "Stall and fakie out.", tips: "Lift front trucks over coping.", prereqs: ["drop-in"] },
-          { id: "fly out", name: "Fly Out", description: "Exit ramp to flat.", tips: "Level board in air.", prereqs: ["pumping"] },
-          { id: "boneless", name: "Boneless", description: "Grab, plant, jump.", tips: "Plant front foot and jump.", prereqs: ["tictac"] },
-          { id: "spine transfer", name: "Spine Transfer", description: "Over a spine peak.", tips: "Lean forward over peak.", prereqs: ["fly out"] }
+          { id: "pop_shuvit", name: "Pop Shuvit", description: "180 board spin with a pop.", tips: "Pop it hard and scoop.", prereqs: ["shuvit"] },
+          { id: "rock_to_fakie", name: "Rock to Fakie", description: "Stall and fakie out.", tips: "Lift front trucks over coping.", prereqs: ["drop_in"] },
+          { id: "fly_out", name: "Fly Out", description: "Exit ramp to flat.", tips: "Level board in air.", prereqs: ["pumping"] },
+          { id: "boneless", name: "Boneless", description: "Grab, plant, jump.", tips: "Plant front foot and jump.", prereqs: ["tictac"] }
         ]
       },
       4: {
         name: "Advanced (Tier 4)",
         tricks: [
-          { id: "kickflip", name: "Kickflip", description: "Axis flip.", tips: "Flick off the pocket.", prereqs: ["ollie"] }
-          { id: "360 shuvit", name: "360 Shuvit", description: "360 shuvit", tips: "F360 shuvit", prereqs: ["pop shuvit"] }
-
+          { id: "kickflip", name: "Kickflip", description: "The classic board flip.", tips: "Flick off the pocket of the nose.", prereqs: ["ollie"] },
+          { id: "360_shuvit", name: "360 Shuvit", description: "Full rotation spin.", tips: "Big scoop with the back foot toes.", prereqs: ["pop_shuvit"] }
         ]
       },
       5: {
         name: "Pro (Tier 5)",
         tricks: [
-          { id: "pro_placeholder", name: "Pro Skill", description: "High-level maneuver.", tips: "Stay focused.", prereqs: ["kickflip"] }
+          { id: "tre_flip", name: "360 Kickflip", description: "The 360 Shuv + Kickflip combo.", tips: "All in the scoop!", prereqs: ["kickflip", "360_shuvit"] }
         ]
       }
     };
