@@ -28,7 +28,8 @@
     
     .day-btn { background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
     .day-btn.active { background: var(--orange); border-color: #fff; color: #000; }
-
+    
+    input[type="date"], input[type="time"] { background: #000; border: 1px solid #27272a; color: #f97316; font-size: 11px; padding: 4px; border-radius: 4px; outline: none; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
   </style>
 </head>
@@ -54,15 +55,13 @@
             <button onclick="document.getElementById('importFile').click()" class="text-[10px] font-bold uppercase bg-zinc-800 px-3 py-1 rounded border border-zinc-700">Import</button>
             <input type="file" id="importFile" class="hidden" onchange="importData(event)">
         </div>
+        <div class="text-[10px] font-bold text-zinc-500 uppercase">Progress: <span id="statsProgress" class="text-orange-500">0/0</span></div>
       </div>
     </header>
 
     <div class="mb-6" id="notes-area">
       <div class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-3">
-        <div class="flex justify-between items-center mb-2">
-          <label class="text-[9px] font-black uppercase tracking-widest text-zinc-500">Trainer's Log</label>
-        </div>
-        <textarea id="trainerNotes" oninput="saveNotes(this.value)" class="w-full bg-black/40 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-300 outline-none focus:border-orange-900/50" rows="2" placeholder="Notes on stance, fears, or focus areas..."></textarea>
+        <textarea id="trainerNotes" oninput="saveNotes(this.value)" class="w-full bg-black/40 border border-zinc-800 rounded-lg p-3 text-sm text-zinc-300 outline-none" rows="2" placeholder="Trainer notes..."></textarea>
       </div>
     </div>
 
@@ -131,22 +130,22 @@
     };
 
     const tricksData = Object.keys(tierConfig).flatMap(lvl => tierConfig[lvl].tricks.map(t => ({ ...t, level: parseInt(lvl) })));
-    let allStudents = JSON.parse(localStorage.getItem('skate_v9')) || [{ id: "s1", name: "New Skater", progress: {}, videos: {}, stance: 'Regular', notes: '', schedule: [], goals: '' }];
-    let currentId = localStorage.getItem('skate_id_v9') || allStudents[0].id;
+    let allStudents = JSON.parse(localStorage.getItem('skate_v11')) || [{ id: "s1", name: "New Skater", progress: {}, stance: 'Regular', notes: '', schedule: {}, goals: '' }];
+    let currentId = localStorage.getItem('skate_id_v11') || allStudents[0].id;
     let viewMode = 'grid', timerInterval = null, totalSec = 0;
 
     function getS() { return allStudents.find(s => s.id === currentId) || allStudents[0]; }
-    function save() { localStorage.setItem('skate_v9', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v9', currentId); }
+    function save() { localStorage.setItem('skate_v11', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v11', currentId); }
 
     function render() {
       const s = getS();
+      document.getElementById('statsProgress').textContent = `${Object.keys(s.progress).length}/${tricksData.length}`;
       document.getElementById('stanceBtn').textContent = s.stance || 'Regular';
       document.getElementById('trainerNotes').value = s.notes || '';
       
-      // Update Button Highlights
-      document.getElementById('btnGrid').className = viewMode === 'grid' ? 'py-2 rounded text-[10px] font-bold transition-all btn-active' : 'py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold transition-all';
-      document.getElementById('btnTree').className = viewMode === 'tree' ? 'py-2 rounded text-[10px] font-bold transition-all btn-active' : 'py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold transition-all';
-      document.getElementById('btnSched').className = viewMode === 'schedule' ? 'py-2 rounded text-[10px] font-bold transition-all btn-active' : 'py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold transition-all';
+      document.getElementById('btnGrid').className = viewMode === 'grid' ? 'py-2 rounded btn-active text-[10px] font-bold' : 'py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold';
+      document.getElementById('btnTree').className = viewMode === 'tree' ? 'py-2 rounded btn-active text-[10px] font-bold' : 'py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold';
+      document.getElementById('btnSched').className = viewMode === 'schedule' ? 'py-2 rounded btn-active text-[10px] font-bold' : 'py-2 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold';
 
       const container = document.getElementById('main-container');
       container.innerHTML = '';
@@ -198,24 +197,34 @@
 
     function renderSchedule(student) {
         const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-        const schedData = student.schedule || [];
+        const sched = student.schedule || {};
         document.getElementById('main-container').innerHTML = `
-            <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl">
-                <h3 class="text-xs font-black uppercase tracking-widest text-orange-500 mb-6">Weekly Training Days</h3>
-                <div class="grid grid-cols-7 gap-2 mb-8">
-                    ${days.map(d => `<div onclick="toggleDay('${d}')" class="day-btn ${schedData.includes(d) ? 'active' : ''}">${d}</div>`).join('')}
+            <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl">
+                <h3 class="text-xs font-black uppercase text-orange-500 mb-4">Training Planner</h3>
+                <div class="grid grid-cols-7 gap-1 mb-6">
+                    ${days.map(d => `<div onclick="toggleDay('${d}')" class="day-btn ${sched[d] ? 'active' : ''}">${d}</div>`).join('')}
                 </div>
-                <h3 class="text-xs font-black uppercase tracking-widest text-orange-500 mb-4">Current Goals</h3>
-                <textarea oninput="saveGoals(this.value)" class="w-full bg-black border border-zinc-800 rounded-xl p-4 text-sm text-zinc-300 outline-none" rows="5" placeholder="E.g. Clean up Ollies, try dropping in solo...">${student.goals || ''}</textarea>
+                <div id="plannerDetails" class="space-y-3 mb-6">
+                    ${days.filter(d => sched[d]).map(d => `
+                        <div class="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-zinc-800">
+                            <span class="text-[10px] font-bold w-8 text-orange-500">${d}</span>
+                            <input type="date" value="${sched[d].date || ''}" onchange="updateSched('${d}', 'date', this.value)">
+                            <input type="time" value="${sched[d].time || ''}" onchange="updateSched('${d}', 'time', this.value)">
+                        </div>
+                    `).join('')}
+                </div>
+                <h3 class="text-xs font-black uppercase text-orange-500 mb-2">Weekly Goal</h3>
+                <textarea oninput="saveGoals(this.value)" class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-xs text-zinc-300 outline-none" rows="3" placeholder="Set a target...">${student.goals || ''}</textarea>
             </div>`;
     }
 
     window.toggleDay = (day) => { 
-        const s = getS(); if(!s.schedule) s.schedule = [];
-        if(s.schedule.includes(day)) s.schedule = s.schedule.filter(d => d !== day);
-        else s.schedule.push(day);
+        const s = getS(); if(!s.schedule) s.schedule = {};
+        if(s.schedule[day]) delete s.schedule[day];
+        else s.schedule[day] = { date: '', time: '' };
         save(); render();
     };
+    window.updateSched = (day, field, val) => { getS().schedule[day][field] = val; save(); };
     window.saveGoals = (val) => { getS().goals = val; save(); };
     window.saveNotes = (val) => { getS().notes = val; save(); };
     window.setView = (v) => { viewMode = v; render(); };
@@ -231,14 +240,14 @@
       document.getElementById('modal-overlay').classList.remove('hidden');
     }
 
-    window.addStudent = () => { const name = prompt("Skater Name:"); if(name) { const newS = { id: 's'+Date.now(), name, progress: {}, videos: {}, stance: 'Regular', notes: '', schedule: [], goals: '' }; allStudents.push(newS); currentId = newS.id; save(); init(); } };
+    window.addStudent = () => { const name = prompt("Skater Name:"); if(name) { const newS = { id: 's'+Date.now(), name, progress: {}, stance: 'Regular', notes: '', schedule: {}, goals: '' }; allStudents.push(newS); currentId = newS.id; save(); init(); } };
     window.deleteStudent = () => { if(allStudents.length > 1 && confirm("Delete skater?")) { allStudents = allStudents.filter(s => s.id !== currentId); currentId = allStudents[0].id; save(); init(); } };
     window.switchStudent = (id) => { currentId = id; save(); render(); };
     window.toggleStance = () => { const s = getS(); s.stance = s.stance === 'Regular' ? 'Goofy' : 'Regular'; save(); render(); };
 
     window.exportData = () => {
         const blob = new Blob([JSON.stringify(allStudents)], {type: 'application/json'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'demented_academy_backup.json'; a.click();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'demented_backup.json'; a.click();
     };
     window.importData = (e) => {
         const reader = new FileReader();
