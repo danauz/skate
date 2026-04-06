@@ -33,16 +33,21 @@
 <body class="pb-24">
   <div class="max-w-5xl mx-auto p-4">
     <header class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 mb-4">
-      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex justify-between items-start mb-4">
         <div>
           <h1 class="text-xl font-black italic uppercase tracking-tighter">Academy Coach</h1>
           <div id="sessionTimer" class="text-[9px] font-bold text-zinc-500 mt-1 uppercase">Session: 00:00:00</div>
         </div>
-        <div class="flex flex-wrap gap-2 justify-center">
+        <div class="flex flex-col items-end gap-2">
           <button id="timerBtn" onclick="toggleTimer()" class="bg-zinc-800 text-[9px] font-bold uppercase px-3 py-1 rounded border border-zinc-700">Start Session</button>
-          <select id="studentSelect" onchange="switchStudent(this.value)" class="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs font-bold uppercase"></select>
-          <button onclick="addStudent()" class="bg-zinc-800 px-2 rounded border border-zinc-700 text-xs">＋</button>
+          <button id="globalStance" onclick="toggleStance()" class="text-[10px] font-black uppercase text-orange-500 bg-black px-3 py-1 rounded-full border border-zinc-800 shadow-sm shadow-orange-900/20">
+            REGULAR 🛹
+          </button>
         </div>
+      </div>
+      <div class="flex gap-2">
+        <select id="studentSelect" onchange="switchStudent(this.value)" class="flex-1 bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-xs font-bold uppercase"></select>
+        <button onclick="addStudent()" class="bg-zinc-800 px-4 rounded border border-zinc-700 font-bold">＋</button>
       </div>
     </header>
 
@@ -103,7 +108,7 @@
     };
 
     const tricksData = Object.keys(tierConfig).flatMap(lvl => tierConfig[lvl].tricks.map(t => ({ ...t, level: parseInt(lvl) })));
-    let students = JSON.parse(localStorage.getItem('skate_v26_master')) || [{ id: "s1", name: "Skater 1", progress: {}, trickData: {}, history: [], plan: {}, goal: "", stance: "Regular" }];
+    let students = JSON.parse(localStorage.getItem('skate_v26_master')) || [{ id: "s1", name: "Skater 1", progress: {}, trickData: {}, history: [], plan: {}, goal: "", stance: "Regular", scheduledSessions: [] }];
     let currentId = localStorage.getItem('sid_v26_master') || students[0].id;
     let viewMode = 'grid', timerInterval = null, currentSessionSec = 0;
 
@@ -111,7 +116,15 @@
     function save() { localStorage.setItem('skate_v26_master', JSON.stringify(students)); localStorage.setItem('sid_v26_master', currentId); }
 
     function render() {
-      const s = getS(); const container = document.getElementById('main-container'); container.innerHTML = '';
+      const s = getS(); 
+      const container = document.getElementById('main-container'); 
+      container.innerHTML = '';
+      
+      // Update Global Stance Button
+      if(document.getElementById('globalStance')) {
+          document.getElementById('globalStance').textContent = `${(s.stance || 'Regular').toUpperCase()} 🛹`;
+      }
+
       const btns = ['btnGrid', 'btnTree', 'btnSched', 'btnHistory'];
       btns.forEach(b => document.getElementById(b).className = 'py-2 rounded bg-zinc-800 text-zinc-400 text-[9px] font-bold uppercase');
       const activeBtn = viewMode === 'grid' ? 'btnGrid' : viewMode === 'tree' ? 'btnTree' : viewMode === 'schedule' ? 'btnSched' : 'btnHistory';
@@ -155,46 +168,41 @@
         document.getElementById('main-container').innerHTML = `<div class="tree-container-wrapper"><svg class="tree-svg" style="width:${maxWidth}px; height:${sortedTiers.length * (nodeH + gapY) + 60}px">${lines}${nodes}</svg></div>`;
     }
 
-function renderSchedule(student) {
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    student.scheduledSessions = student.scheduledSessions || [];
-    
-    document.getElementById('main-container').innerHTML = `
-        <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
-            <div class="flex justify-between items-center mb-6 bg-black p-3 rounded-xl border border-zinc-800">
-                <span class="text-[10px] font-bold uppercase text-zinc-500">Stance</span>
-                <button onclick="toggleStance()" class="text-xs font-black uppercase text-orange-500">${student.stance || 'Regular'} 🛹</button>
-            </div>
-            
-            <div class="grid grid-cols-7 gap-1 mb-8">
-                ${days.map(d => `<button onclick="toggleDay('${d}')" class="py-3 text-[10px] font-bold rounded-lg border ${student.plan && student.plan[d] ? 'bg-orange-600 border-orange-400' : 'bg-zinc-800 border-zinc-700 text-zinc-500'}">${d}</button>`).join('')}
-            </div>
+    function renderSchedule(student) {
+        const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        student.scheduledSessions = student.scheduledSessions || [];
+        
+        document.getElementById('main-container').innerHTML = `
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
+                <div class="grid grid-cols-7 gap-1 mb-8">
+                    ${days.map(d => `<button onclick="toggleDay('${d}')" class="py-3 text-[10px] font-bold rounded-lg border ${student.plan && student.plan[d] ? 'bg-orange-600 border-orange-400' : 'bg-zinc-800 border-zinc-700 text-zinc-500'}">${d}</button>`).join('')}
+                </div>
 
-            <h3 class="text-[10px] font-black uppercase text-orange-500 mb-3 tracking-widest">Upcoming Sessions</h3>
-            <div class="flex gap-2 mb-4">
-                <input type="datetime-local" id="schedDate" class="flex-1 bg-black border border-zinc-800 p-2 text-[10px] rounded-lg">
-                <button onclick="addScheduledSession()" class="bg-orange-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase">Add</button>
-            </div>
+                <h3 class="text-[10px] font-black uppercase text-orange-500 mb-3 tracking-widest">Upcoming Sessions</h3>
+                <div class="flex gap-2 mb-4">
+                    <input type="datetime-local" id="schedDate" class="flex-1 bg-black border border-zinc-800 p-2 text-[10px] rounded-lg">
+                    <button onclick="addScheduledSession()" class="bg-orange-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase">Add</button>
+                </div>
 
-            <div class="space-y-2 mb-8">
-                ${student.scheduledSessions.length === 0 ? '<p class="text-[9px] text-zinc-600 italic">No upcoming sessions set.</p>' : 
-                  student.scheduledSessions.map((s, idx) => `
-                    <div class="flex justify-between items-center bg-black p-3 rounded-xl border border-zinc-800">
-                        <span class="text-[10px] font-bold text-zinc-300 uppercase">${new Date(s).toLocaleString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                        <button onclick="deleteSession(${idx})" class="text-zinc-600 hover:text-red-500 text-xs px-2">✕</button>
-                    </div>
-                `).join('')}
-            </div>
+                <div class="space-y-2 mb-8">
+                    ${student.scheduledSessions.length === 0 ? '<p class="text-[9px] text-zinc-600 italic">No upcoming sessions set.</p>' : 
+                      student.scheduledSessions.map((s, idx) => `
+                        <div class="flex justify-between items-center bg-black p-3 rounded-xl border border-zinc-800">
+                            <span class="text-[10px] font-bold text-zinc-300 uppercase">${new Date(s).toLocaleString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                            <button onclick="deleteSession(${idx})" class="text-zinc-600 hover:text-red-500 text-xs px-2">✕</button>
+                        </div>
+                    `).join('')}
+                </div>
 
-            <h3 class="text-[10px] font-black uppercase text-orange-500 mb-2 tracking-widest">Weekly Battle Goal</h3>
-            <textarea oninput="saveGoal(this.value)" class="w-full bg-black border border-zinc-800 p-4 text-xs rounded-xl mb-6" rows="4" placeholder="Weekly Battle Goal...">${student.goal || ''}</textarea>
-            
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="exportData()" class="py-2 bg-zinc-800 rounded text-[9px] font-bold uppercase text-zinc-500">Export</button>
-                <button onclick="importData()" class="py-2 bg-zinc-800 rounded text-[9px] font-bold uppercase text-zinc-500">Import</button>
-            </div>
-        </div>`;
-}
+                <h3 class="text-[10px] font-black uppercase text-orange-500 mb-2 tracking-widest">Weekly Battle Goal</h3>
+                <textarea oninput="saveGoal(this.value)" class="w-full bg-black border border-zinc-800 p-4 text-xs rounded-xl mb-6" rows="4" placeholder="Weekly Battle Goal...">${student.goal || ''}</textarea>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="exportData()" class="py-2 bg-zinc-800 rounded text-[9px] font-bold uppercase text-zinc-500">Export</button>
+                    <button onclick="importData()" class="py-2 bg-zinc-800 rounded text-[9px] font-bold uppercase text-zinc-500">Import</button>
+                </div>
+            </div>`;
+    }
 
     function renderHistory(student) {
         document.getElementById('main-container').innerHTML = `
@@ -243,7 +251,7 @@ function renderSchedule(student) {
     window.saveGoal = (v) => { getS().goal = v; save(); };
     window.toggleStance = () => { const s = getS(); s.stance = (s.stance==="Regular"?"Goofy":"Regular"); save(); render(); };
     window.switchStudent = (id) => { currentId = id; save(); render(); };
-    window.addStudent = () => { const n = prompt("Name:"); if(n){ const id='s'+Date.now(); students.push({id, name:n, progress:{}, trickData:{}, history:[], plan:{}, goal:"", stance:"Regular"}); currentId=id; save(); init(); } };
+    window.addStudent = () => { const n = prompt("Name:"); if(n){ const id='s'+Date.now(); students.push({id, name:n, progress:{}, trickData:{}, history:[], plan:{}, goal:"", stance:"Regular", scheduledSessions:[]}); currentId=id; save(); init(); } };
 
     window.exportData = () => {
         const blob = new Blob([JSON.stringify(students)], {type: 'application/json'});
@@ -257,23 +265,25 @@ function renderSchedule(student) {
             r.readAsText(e.target.files[0]);
         }; i.click();
     };
-window.addScheduledSession = () => {
-    const s = getS();
-    const dateInput = document.getElementById('schedDate').value;
-    if (!dateInput) return;
-    s.scheduledSessions = s.scheduledSessions || [];
-    s.scheduledSessions.push(dateInput);
-    s.scheduledSessions.sort((a, b) => new Date(a) - new Date(b));
-    save();
-    render();
-};
 
-window.deleteSession = (index) => {
-    const s = getS();
-    s.scheduledSessions.splice(index, 1);
-    save();
-    render();
-};
+    window.addScheduledSession = () => {
+        const s = getS();
+        const dateInput = document.getElementById('schedDate').value;
+        if (!dateInput) return;
+        s.scheduledSessions = s.scheduledSessions || [];
+        s.scheduledSessions.push(dateInput);
+        s.scheduledSessions.sort((a, b) => new Date(a) - new Date(b));
+        save();
+        render();
+    };
+
+    window.deleteSession = (index) => {
+        const s = getS();
+        s.scheduledSessions.splice(index, 1);
+        save();
+        render();
+    };
+
     function init() {
         const sel = document.getElementById('studentSelect');
         sel.innerHTML = students.map(s => `<option value="${s.id}" ${s.id===currentId?'selected':''}>${s.name.toUpperCase()}</option>`).join('');
