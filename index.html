@@ -9,15 +9,19 @@
     :root { --bg: #09090b; --surface: #18181b; --orange: #f97316; --green: #22c55e; --border: #27272a; }
     body { background-color: var(--bg); color: #ffffff; font-family: sans-serif; overflow-x: hidden; margin: 0; }
     .neon-orange { color: var(--orange); text-shadow: 0 0 10px rgba(249, 115, 22, 0.5); }
+    .btn-active { background-color: var(--orange) !important; box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); border-color: #ffedd5 !important; color: white !important; }
+    
     .tier-wrapper { margin-bottom: 2.5rem; border-left: 4px solid var(--border); padding-left: 1rem; }
     .trick-card { transition: all 0.2s ease; border: 2px solid var(--border); background-color: var(--surface); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; border-radius: 12px; }
     .trick-card.unlocked { border-color: var(--green); background: linear-gradient(135deg, var(--surface), #064e3b33); }
     .trick-card.locked { opacity: 0.4; filter: grayscale(1); }
     .trick-card.available { border-color: var(--orange); border-style: dashed; }
+    
     .tree-container-wrapper { width: 100%; height: 60vh; background: #000; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: auto; }
     .tree-svg { display: block; background: radial-gradient(circle, #111 1px, transparent 1px); background-size: 30px 30px; }
     .tree-svg line { stroke: #333; stroke-width: 2; }
     .tree-svg line.lit { stroke: var(--green); stroke-width: 3; filter: drop-shadow(0 0 5px #22c55e); }
+    
     .sticker-slot { width: 50px; height: 50px; background: #111; border: 2px dashed #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; filter: grayscale(1); opacity: 0.3; }
     .sticker-slot.earned { filter: grayscale(0); opacity: 1; border-style: solid; border-color: var(--orange); box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
     .timer-active { animation: pulse 2s infinite; background-color: #ef4444 !important; }
@@ -34,7 +38,7 @@
         </div>
         <div class="flex flex-wrap gap-2 justify-center">
           <button id="timerBtn" onclick="toggleTimer()" class="bg-zinc-800 text-[9px] font-bold uppercase px-3 py-1 rounded border border-zinc-700">Start Session</button>
-          <select id="studentSelect" onchange="switchStudent(this.value)" class="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs font-bold uppercase"></select>
+          <select id="studentSelect" onchange="switchStudent(this.value)" class="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs font-bold uppercase outline-none"></select>
           <button onclick="addStudent()" class="bg-zinc-800 px-2 rounded border border-zinc-700 text-xs">＋</button>
           <button onclick="deleteStudent()" class="bg-zinc-800 px-2 rounded border border-zinc-700 text-xs text-red-500">×</button>
         </div>
@@ -57,8 +61,8 @@
       <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
         <div class="text-zinc-500 text-[10px] font-bold uppercase">View Mode</div>
         <div class="flex gap-2 mt-1">
-          <button id="btnGrid" onclick="setView('grid')" class="flex-1 py-1 rounded bg-orange-600 text-[10px] font-bold">TIERS</button>
-          <button id="btnTree" onclick="setView('tree')" class="flex-1 py-1 rounded bg-zinc-800 text-[10px] font-bold">TREE</button>
+          <button id="btnGrid" onclick="setView('grid')" class="flex-1 py-1 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-bold transition-all">TIERS</button>
+          <button id="btnTree" onclick="setView('tree')" class="flex-1 py-1 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-bold transition-all">TREE</button>
         </div>
       </div>
     </div>
@@ -133,6 +137,11 @@
       const s = getS();
       document.getElementById('statsProgress').textContent = `${Object.keys(s.progress).length}/${tricksData.length}`;
       document.getElementById('stanceBtn').textContent = s.stance || 'Regular';
+      
+      // Update Button Highlight
+      document.getElementById('btnGrid').className = viewMode === 'grid' ? 'flex-1 py-1 rounded text-[10px] font-bold transition-all btn-active' : 'flex-1 py-1 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold transition-all';
+      document.getElementById('btnTree').className = viewMode === 'tree' ? 'flex-1 py-1 rounded text-[10px] font-bold transition-all btn-active' : 'flex-1 py-1 rounded bg-zinc-800 border border-zinc-700 text-zinc-400 text-[10px] font-bold transition-all';
+
       const container = document.getElementById('main-container');
       container.innerHTML = '';
       if (viewMode === 'grid') renderGrid(s); else renderTree(s);
@@ -186,7 +195,7 @@
       document.getElementById('modal-content').innerHTML = `
         <h2 class="text-lg font-black italic neon-orange uppercase mb-2">${t.name}</h2>
         <p class="text-zinc-400 text-xs mb-4">${t.description}</p>
-        <input type="text" id="vUrl" value="${s.videos[id] || ''}" placeholder="YouTube/Instagram Link" class="w-full bg-black border border-zinc-800 p-2 text-xs rounded mb-4 text-orange-500">
+        <input type="text" id="vUrl" value="${s.videos[id] || ''}" placeholder="YouTube/Instagram Link" class="w-full bg-black border border-zinc-800 p-2 text-xs rounded mb-4 text-orange-500 outline-none">
         <div class="flex gap-2">
           <button onclick="toggleTrick('${id}')" class="flex-1 py-3 bg-orange-600 rounded-lg font-bold text-xs uppercase">${s.progress[id] ? 'Unlearn' : 'Mastered'}</button>
           <button onclick="saveVid('${id}')" class="px-4 py-3 bg-zinc-700 rounded-lg font-bold text-xs uppercase">Save</button>
