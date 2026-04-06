@@ -26,8 +26,15 @@
 
     .tree-container-wrapper { width: 100%; height: 60vh; background: #000; border-radius: 12px; border: 1px solid var(--border); position: relative; overflow: auto; }
     .tree-svg { display: block; background: radial-gradient(circle, #111 1px, transparent 1px); background-size: 30px 30px; }
-    .tree-svg line { stroke: #333; stroke-width: 2; }
-    .tree-svg line.lit { stroke: var(--green); stroke-width: 3; }
+    
+    /* Tree Node Glowing States */
+    .tree-node rect { transition: all 0.3s ease; stroke-width: 2; }
+    .node-unlocked rect { stroke: var(--green); fill: #064e3b; filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.4)); }
+    .node-available rect { stroke: var(--orange); stroke-dasharray: 4; }
+    .node-locked { opacity: 0.3; }
+
+    .tree-svg line { stroke: #333; stroke-width: 2; transition: all 0.3s ease; }
+    .tree-svg line.lit { stroke: var(--green); stroke-width: 3; filter: drop-shadow(0 0 5px var(--green)); }
     
     .sticker-slot { width: 50px; height: 50px; background: #111; border: 2px dashed #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0.2; }
     .sticker-slot.earned { opacity: 1; border-style: solid; border-color: var(--orange); }
@@ -131,12 +138,12 @@
     };
 
     const tricksData = Object.keys(tierConfig).flatMap(lvl => tierConfig[lvl].tricks.map(t => ({ ...t, level: parseInt(lvl) })));
-    let allStudents = JSON.parse(localStorage.getItem('skate_v12')) || [{ id: "s1", name: "New Skater", progress: {}, trickData: {}, stance: 'Regular', notes: '', schedule: {}, goals: '' }];
-    let currentId = localStorage.getItem('skate_id_v12') || allStudents[0].id;
+    let allStudents = JSON.parse(localStorage.getItem('skate_v13')) || [{ id: "s1", name: "New Skater", progress: {}, trickData: {}, stance: 'Regular', notes: '', schedule: {}, goals: '' }];
+    let currentId = localStorage.getItem('skate_id_v13') || allStudents[0].id;
     let viewMode = 'grid', timerInterval = null, totalSec = 0;
 
     function getS() { return allStudents.find(s => s.id === currentId) || allStudents[0]; }
-    function save() { localStorage.setItem('skate_v12', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v12', currentId); }
+    function save() { localStorage.setItem('skate_v13', JSON.stringify(allStudents)); localStorage.setItem('skate_id_v13', currentId); }
 
     function render() {
       const s = getS();
@@ -159,8 +166,8 @@
     function renderGrid(student) {
       Object.keys(tierConfig).forEach(lvl => {
         const rowTricks = tierConfig[lvl].tricks;
-        const completed = rowTricks.filter(t => student.progress[t.id]).length;
-        const xpPercent = (completed / rowTricks.length) * 100;
+        const completedCount = rowTricks.filter(t => student.progress[t.id]).length;
+        const xpPercent = (completedCount / rowTricks.length) * 100;
 
         const section = document.createElement('div');
         section.className = `tier-wrapper`;
@@ -188,6 +195,48 @@
             </div>`;
         document.getElementById('main-container').appendChild(section);
       });
+    }
+
+    function renderTree(student) {
+        const nodeW = 120, nodeH = 45, gapX = 40, gapY = 80;
+        const pos = {};
+        const sortedTiers = Object.keys(tierConfig).sort();
+        let maxWidth = 0;
+        sortedTiers.forEach(lvl => maxWidth = Math.max(maxWidth, tierConfig[lvl].tricks.length * (nodeW + gapX)));
+        
+        sortedTiers.forEach((lvl, row) => {
+            const rowTricks = tierConfig[lvl].tricks;
+            const startX = (maxWidth - (rowTricks.length * (nodeW + gapX))) / 2;
+            rowTricks.forEach((t, col) => pos[t.id] = { x: startX + col * (nodeW + gapX), y: row * (nodeH + gapY) + 40 });
+        });
+
+        let lines = '', nodes = '';
+        tricksData.forEach(t => {
+            const p = pos[t.id];
+            t.prereqs.forEach(pid => {
+                const parent = pos[pid];
+                if (parent) {
+                    const lit = student.progress[t.id] && student.progress[pid];
+                    lines += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${lit ? 'lit' : ''}" />`;
+                }
+            });
+            const unlocked = student.progress[t.id];
+            const ready = t.prereqs.every(pr => student.progress[pr]);
+            const status = unlocked ? 'node-unlocked' : (ready ? 'node-available' : 'node-locked');
+            
+            nodes += `
+            <g class="tree-node ${status}" onclick="openModal('${t.id}')" style="cursor:pointer">
+                <rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" rx="8" fill="#18181b" stroke="#333" />
+                <text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 4}" text-anchor="middle" fill="white" font-size="9" font-weight="bold" class="uppercase">${t.name}</text>
+            </g>`;
+        });
+
+        document.getElementById('main-container').innerHTML = `
+            <div class="tree-container-wrapper">
+                <svg class="tree-svg" style="width:${maxWidth}px; height:${sortedTiers.length * (nodeH + gapY) + 100}px">
+                    ${lines}${nodes}
+                </svg>
+            </div>`;
     }
 
     function openModal(id) {
@@ -271,6 +320,16 @@
             document.getElementById(`badge-${lvl}`).className = complete ? 'sticker-slot earned' : 'sticker-slot';
         });
     }
+
+    window.exportData = () => {
+        const blob = new Blob([JSON.stringify(allStudents)], {type: 'application/json'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'academy_backup.json'; a.click();
+    };
+    window.importData = (e) => {
+        const reader = new FileReader();
+        reader.onload = (event) => { allStudents = JSON.parse(event.target.result); currentId = allStudents[0].id; save(); init(); };
+        reader.readAsText(e.target.files[0]);
+    };
 
     function init() {
       document.getElementById('studentSelect').innerHTML = allStudents.map(s => `<option value="${s.id}" ${s.id === currentId ? 'selected' : ''}>${s.name.toUpperCase()}</option>`).join('');
