@@ -9,13 +9,12 @@
     :root { 
         --bg: #050505; 
         --surface: #111113; 
-        --orange: #ff5f00; /* Vivid Safety Orange */
+        --orange: #ff5f00; 
         --green: #22c55e; 
         --border: #27272a; 
     }
     body { background-color: var(--bg); color: #ffffff; font-family: sans-serif; overflow-x: hidden; margin: 0; }
     
-    /* Active Button Glow */
     .btn-active { 
         background-color: var(--orange) !important; 
         color: white !important; 
@@ -25,7 +24,6 @@
     
     .tier-wrapper { margin-bottom: 2.5rem; border-left: 4px solid #1a1a1c; padding-left: 1rem; }
     
-    /* High-Voltage XP Bar */
     .xp-bar-bg { width: 100%; height: 8px; background: #000; border-radius: 10px; margin: 8px 0 16px 0; overflow: hidden; border: 1px solid #222; }
     .xp-bar-fill { 
         height: 100%; 
@@ -34,7 +32,6 @@
         transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
     }
 
-    /* Card Polishing */
     .trick-card { transition: all 0.2s ease; border: 2px solid var(--border); background-color: var(--surface); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; border-radius: 12px; cursor: pointer; }
     .trick-card.unlocked { border-color: var(--green); background: linear-gradient(135deg, #111113, #064e3b66); box-shadow: 0 0 10px rgba(34, 197, 94, 0.15); }
     .trick-card.locked { opacity: 0.2; filter: grayscale(1); pointer-events: none; }
@@ -46,7 +43,6 @@
         box-shadow: 0 0 8px var(--orange); 
     }
 
-    /* Daily Mission HUD */
     .mission-card {
         background: linear-gradient(180deg, rgba(20,20,22,1) 0%, rgba(10,10,12,1) 100%);
         border: 2px solid rgba(255, 95, 0, 0.4);
@@ -56,6 +52,12 @@
     .tree-container-wrapper { width: 100%; height: 60vh; background: #000; border-radius: 12px; border: 1px solid var(--border); overflow: auto; }
     .tree-svg line.lit { stroke: var(--green); stroke-width: 3; filter: drop-shadow(0 0 5px var(--green)); }
     
+    /* Tree Node States */
+    .node-unlocked rect { stroke: var(--green); fill: rgba(34, 197, 94, 0.1); stroke-width: 2; filter: drop-shadow(0 0 5px var(--green)); }
+    .node-unlocked text { fill: var(--green); }
+    .node-available rect { stroke: var(--orange); stroke-dasharray: 4; }
+    .node-locked { opacity: 0.2; }
+
     .timer-active { animation: pulse 1s infinite; background-color: #ff0000 !important; box-shadow: 0 0 20px rgba(255,0,0,0.4); }
     input, textarea, select { background: #000 !important; border: 1px solid var(--border) !important; color: white !important; outline: none; }
     @keyframes pulse { 50% { opacity: 0.7; } }
@@ -183,7 +185,6 @@
             <div class="mission-card p-5 rounded-2xl mb-8 relative overflow-hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-[11px] font-black uppercase tracking-[0.3em] text-orange-500">Daily Mission</h2>
-                    <span class="text-[8px] font-black bg-orange-600 text-white px-2 py-0.5 rounded italic tracking-tighter">DEMENTED DU</span>
                 </div>
                 <div class="grid grid-cols-3 gap-3">
                     ${challengeTricks.length > 0 ? challengeTricks.map(t => `
@@ -223,7 +224,10 @@
         let lines = '', nodes = '';
         tricksData.forEach(t => {
             const p = pos[t.id]; t.pre.forEach(pid => {
-                const parent = pos[pid]; if (parent) { const lit = student.progress[t.id] && student.progress[pid]; lines += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${lit ? 'lit' : ''}" stroke="#333" />`; }
+                const parent = pos[pid]; if (parent) { 
+                    const lit = student.progress[t.id]; 
+                    lines += `<line x1="${parent.x + nodeW/2}" y1="${parent.y + nodeH}" x2="${p.x + nodeW/2}" y2="${p.y}" class="${lit ? 'lit' : ''}" stroke="#333" />`; 
+                }
             });
             const status = student.progress[t.id] ? 'node-unlocked' : (t.pre.every(pr => student.progress[pr]) ? 'node-available' : 'node-locked');
             nodes += `<g class="${status}" onclick="openModal('${t.id}')" style="cursor:pointer"><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${nodeH}" rx="6" fill="#18181b" stroke="#333" /><text x="${p.x + nodeW/2}" y="${p.y + nodeH/2 + 4}" text-anchor="middle" fill="white" font-size="8" font-weight="bold" class="uppercase">${t.name}</text></g>`;
@@ -253,8 +257,8 @@
                         </div>
                     `).join('')}
                 </div>
-                <h3 class="text-[10px] font-black uppercase text-orange-500 mb-2 tracking-widest">Weekly Battle Goal</h3>
-                <textarea oninput="saveGoal(this.value)" class="w-full bg-black border border-zinc-800 p-4 text-xs rounded-xl mb-6" rows="4" placeholder="Weekly Battle Goal...">${student.goal || ''}</textarea>
+                <h3 class="text-[10px] font-black uppercase text-orange-500 mb-2 tracking-widest">Weekly Goal</h3>
+                <textarea oninput="saveGoal(this.value)" class="w-full bg-black border border-zinc-800 p-4 text-xs rounded-xl mb-6" rows="4" placeholder="Weekly goal...">${student.goal || ''}</textarea>
             </div>`;
     }
 
